@@ -50,6 +50,8 @@ class KAN(torch.nn.Module):
             y = x.clone()
             for l in self.layers[:i]:
                 y = l(y)
+
+            print(y)
             layer.update_grid(y)
 
     def forward(self, x):

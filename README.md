@@ -3,13 +3,26 @@ Implementations of KAN variations.
 
 # Installation
 
-# DOCS
+# Docs
+
+# Problems
+- [ ] small error in network output after update_grid (around 0.00232 max absolute difference between original model) - hard to reproduce, error is seen after first layer.
+- [ ] update_grid run model multiple times, is it necessary?
 
 # TODO/Ideas:
 - [ ] Base structure
 - [ ] KAN implementation
+- [ ] Grid extension
+- [ ] More real datasets?
+- [ ] MNIST
+- [ ] CIFAR10
 - [ ] Fourier KAN?
+- [ ] pruning
+- [ ] testing continual learning
+- [ ] KAN vs MLP in "LLM" test?
 
+## Propably avoid:
+- symbolic representation - in my opinion it create confusion in code, create code hard to edit and is not suitable for bigger networks (propably is better only for physics problems)
 
 # Citations
 ```python
