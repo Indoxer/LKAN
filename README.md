@@ -9,10 +9,10 @@ Implementations of KAN variations.
 - [ ] Base structure
 - [ ] KAN implementation
 - [ ] Fourier KAN?
-- [ ] 
 
 
 # Citations
+```python
 @misc{liu2024kan,
       title={KAN: Kolmogorov-Arnold Networks}, 
       author={Ziming Liu and Yixuan Wang and Sachin Vaidya and Fabian Ruehle and James Halverson and Marin Soljačić and Thomas Y. Hou and Max Tegmark},
@@ -21,3 +21,4 @@ Implementations of KAN variations.
       archivePrefix={arXiv},
       primaryClass={cs.LG}
 }
+```
