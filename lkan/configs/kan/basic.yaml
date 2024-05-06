@@ -6,14 +6,14 @@ model_params:
   k: 3
   noise_scale: 0.1
   noise_scale_base: 0.1
-  scale_spline: 1.0
+  scale_spline: null # float or null (null only for version b)
   base_fun: silu
-  grid_eps: 1.0
+  grid_eps: 0.02
   grid_range: [-1, 1]
   bias_trainable: true
   sp_trainable: true
   sb_trainable: true
-  kan_layer_version: normal
+  kan_layer_version: b
   device: ${trainer_params.device}
 trainer: lkan.trainers.BasicKANTrainer
 trainer_params:

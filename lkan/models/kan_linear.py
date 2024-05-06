@@ -117,8 +117,10 @@ class KANLinear(torch.nn.Module):
         # [batch_size, in_dim, grid_size + k]
         splines = b_splines(x, self.grid, self.k)
 
+        orig_coeff = self.coeff * self.scale_spline.unsqueeze(-1)
+
         # [in_dim, batch_size, grid_size + k] @ [in_dim, grid_size + k, out_dim] = [in_dim, batch_size, out_dim] -> [batch_size, in_dim, out_dim]
-        y = (splines.permute(1, 0, 2) @ self.coeff.permute(1, 2, 0)).permute(1, 0, 2)
+        y = (splines.permute(1, 0, 2) @ orig_coeff.permute(1, 2, 0)).permute(1, 0, 2)
 
         # sort activations in ascending order for each input dimension
         x_sorted = torch.sort(x, dim=0)[0]  # [batch_size, in_dim]

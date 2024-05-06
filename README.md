@@ -18,6 +18,9 @@ See examples/ (in future)
 # Problems
 - [ ] update_grid for MNIST raise errors (big parts of images are zero, so torch.linalg.lstsq raise error)
 - [ ] update_grid_from_samples in original KAN run model multiple times, is it necessary? 
+- [ ] parameters counting, is grid parameter or not?
+- [ ] MLP training is almost instant, but KAN train slow on start
+- [ ] MLP (around 230 it/s), KAN (around 130 it/s), need optimization. Maybe worse, data flow can be bootleneck for MLP
 
 # TODO/Ideas:
 - [x] Base structure

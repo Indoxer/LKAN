@@ -40,9 +40,11 @@ class KAN(torch.nn.Module):
                     k=k,
                     noise_scale=noise_scale,
                     noise_scale_base=noise_scale_base,
+                    scale_spline=scale_spline,
                     base_fun=base_fun,
                     grid_eps=grid_eps,
                     grid_range=grid_range,
+                    sp_trainable=sp_trainable,
                     sb_trainable=sb_trainable,
                     device=device,
                 )

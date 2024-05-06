@@ -26,7 +26,7 @@ class TestDataModule(BaseDataModule):
         self.n_samples = n_samples
 
     def setup(self):
-        x = torch.rand(self.n_samples, self.n_var) * 0.0
+        x = torch.rand(self.n_samples, self.n_var)
         y = self.f(x)
 
         dataset = torch.utils.data.TensorDataset(x, y)

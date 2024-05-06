@@ -1,31 +1,14 @@
 script: lkan.scripts.train
-model: lkan.models.KAN
+model: lkan.models.MLP
 model_params:
   layers_dims:
   - 784
-  - 11
+  - 128
   - 10
-  grid_size: 5
-  k: 3
-  noise_scale: 0.1
-  noise_scale_base: 0.1
-  scale_spline: 1.0
-  base_fun: silu
-  grid_eps: 1.0
-  grid_range:
-  - -1
-  - 1
-  bias_trainable: true
-  sp_trainable: true
-  sb_trainable: true
-  kan_layer_version: normal
   device: ${trainer_params.device}
-trainer: lkan.trainers.ImgKANTrainer
+trainer: lkan.trainers.ImgMLPTrainer
 trainer_params:
   lr: 0.0003
-  update_grid: false
-  grid_update_freq: 63
-  stop_grid_update_step: 10000
   lr_step: null
   clip_grad_norm: 0.5
   accumulate_grad_batches: 1
@@ -43,6 +26,6 @@ datamodule_params:
   split_ratio: 0.8
   root: ./.data
   input_size: 28
-save_dir: ./.experiments/mnistkan/v1
-name: mnistkan
+save_dir: ./.experiments/mnistmlp/v1
+name: mnistmlp
 version: v1
