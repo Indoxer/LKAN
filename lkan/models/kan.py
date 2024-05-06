@@ -3,7 +3,7 @@ import enum
 import torch
 
 from .kan_linear import KANLinear
-from .kan_linear_b import KANLinearB
+from .kan_linear_2 import KANLinear2
 
 
 class KAN(torch.nn.Module):
@@ -32,8 +32,8 @@ class KAN(torch.nn.Module):
                 base_fun = torch.nn.SiLU()
 
         for in_dim, out_dim in zip(layers_dims, layers_dims[1:]):
-            if kan_layer_version == "b":
-                layer = KANLinearB(
+            if kan_layer_version == 2:
+                layer = KANLinear2(
                     in_dim=in_dim,
                     out_dim=out_dim,
                     grid_size=grid_size,
@@ -48,7 +48,7 @@ class KAN(torch.nn.Module):
                     sb_trainable=sb_trainable,
                     device=device,
                 )
-            elif kan_layer_version == "normal":
+            elif kan_layer_version == 1:
                 layer = KANLinear(
                     in_dim=in_dim,
                     out_dim=out_dim,

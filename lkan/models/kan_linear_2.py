@@ -7,7 +7,7 @@ from lkan.utils.kan import b_splines, curve2coeff
 from .kan_linear import KANLinear
 
 
-class KANLinearB(KANLinear):
+class KANLinear2(KANLinear):
     def __init__(
         self,
         in_dim,

@@ -58,6 +58,6 @@ See examples/ (in future)
 ```
 [Original KAN repo](https://github.com/KindXiaoming/pykan) - base idea
 
-[efficient-kan](https://github.com/Blealtan/efficient-kan) - KANLinearB and optimizations
+[efficient-kan](https://github.com/Blealtan/efficient-kan) - KANLinear2 and optimizations
 
 

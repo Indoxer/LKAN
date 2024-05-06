@@ -13,7 +13,7 @@ model_params:
   bias_trainable: true
   sp_trainable: true
   sb_trainable: true
-  kan_layer_version: b
+  kan_layer_version: 1
   device: ${trainer_params.device}
 trainer: lkan.trainers.ImgKANTrainer
 trainer_params:
