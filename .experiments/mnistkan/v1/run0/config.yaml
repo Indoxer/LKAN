@@ -11,14 +11,14 @@ model_params:
   noise_scale_base: 0.1
   scale_spline: 1.0
   base_fun: silu
-  grid_eps: 1.0
+  grid_eps: 0.02
   grid_range:
   - -1
   - 1
   bias_trainable: true
   sp_trainable: true
   sb_trainable: true
-  kan_layer_version: 1
+  kan_layer_version: 2
   device: ${trainer_params.device}
 trainer: lkan.trainers.ImgKANTrainer
 trainer_params:

@@ -5,7 +5,7 @@ model_params:
   device: ${trainer_params.device}
 trainer: lkan.trainers.BasicMLPTrainer
 trainer_params:
-    lr: 0.01
+    lr: 0.001
     lr_step: null
     clip_grad_norm: 0.5
     accumulate_grad_batches: 1
