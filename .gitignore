@@ -1,4 +1,4 @@
 tmp/
 __pycache__/
-.experiments/
 .data/
+checkpoints/

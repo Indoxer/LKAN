@@ -1,6 +1,14 @@
 # Large Kolmogorov-Arnold Networks
 Implementations of KAN variations.
 
+Now I try train KAN on MNIST:
+- I don't upgrade grid in kan - need update
+- KAN - 96095 parameters, MLP - 101770 parameters
+- is KAN slow in traning or initialization problem? MLP got 0.9 accuracy instant
+- KAN around 120 it/s, MLP 210 it/s (almost 2x slower, need optimalization)
+- MLP [784, 128, 10], KAN [784, 11, 10]
+- On bigger KAN [784, 64, 10] i can't get good accuracy, i think is because of grid.
+
 # Installation
 
 ```
@@ -29,6 +37,7 @@ See examples/ (in future)
 - [ ] MNIST
 - [ ] CIFAR10
 - [ ] More datasets?
+- [ ] KAN as CNN filter, KAN in VIT?
 - [ ] Fourier KAN?
 - [ ] pruning
 - [ ] testing continual learning
