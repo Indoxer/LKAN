@@ -74,7 +74,9 @@ class KAN(torch.nn.Module):
             layer.update_grid(x)
             x = layer(x)
 
-    def forward(self, x):
+    def forward(self, x, update_grid=False):
         for layer in self.layers:
+            if update_grid:
+                layer.update_grid(x)
             x = layer(x)
         return x
