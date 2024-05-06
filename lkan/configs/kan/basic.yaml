@@ -1,8 +1,8 @@
 script: lkan.scripts.train
 model: lkan.models.KAN
 model_params:
-  layers_dims: [2,5,1]
-  grid_number: 5
+  layers_dims: [2,3,1]
+  grid_size: 5
   k: 3
   noise_scale: 0.1
   noise_scale_base: 0.1
@@ -13,10 +13,11 @@ model_params:
   bias_trainable: true
   sp_trainable: true
   sb_trainable: true
+  kan_layer_version: normal
   device: ${trainer_params.device}
 trainer: lkan.trainers.BasicKANTrainer
 trainer_params:
-    lr: 0.01
+    lr: 0.001
     update_grid: false
     grid_update_freq: 63
     stop_grid_update_step: 10000

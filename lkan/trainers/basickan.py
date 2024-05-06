@@ -45,9 +45,8 @@ class BasicKANTrainer(BaseTrainer):
             and self.update_grid
         ):
             self.model.update_grid(batch[0])
-            print("grid updated")
 
-        return super().training_step(batch, batch_idx)
+        super().training_step(batch, batch_idx)
 
     def step(self, batch, batch_idx):
         x, y = batch
