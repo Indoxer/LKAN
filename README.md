@@ -15,12 +15,14 @@ To view charts, run `tensorboard --logdir .experiments/`
 
 See examples/ (in future)
 
+Performance:
+MLP (31.8M parameters) - 51 it/s, KANLinear (32.3 M parameters) - 4.3 it/s, KANLinear2 (31M parameters) - 36.5 it/s (rtx 2060 mobile, mnist)
+
 # Problems
 - [ ] update_grid on cuda raise error (torch.linalg.lstsq assume full rank on cuda, only one algorithm) - solved temporary, moved calculating lstsq to cpu
 - [ ] update_grid_from_samples in original KAN run model multiple times, is it necessary? 
 - [ ] parameters counting, is grid parameter or not?
 - [ ] MLP training is almost instant, but KAN train slow on start
-- [ ] MLP (31.8M parameters) - 51 it/s, KANLinear (32.3 M parameters) - 4.3 it/s, KANLinear2 (31M parameters) - 36.5 it/s (rtx 2060 mobile, mnist)
 
 # TODO/Ideas:
 - [x] Base structure
