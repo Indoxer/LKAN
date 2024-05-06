@@ -5,6 +5,7 @@ Implementations of KAN variations.
 
 ```
 pip install .
+```
 
 # Docs
 
