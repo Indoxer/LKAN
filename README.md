@@ -15,9 +15,13 @@ To view charts, run `tensorboard --logdir .experiments/`
 
 See examples/ (in future)
 
-Performance:
+Performance (rtx 2060 mobile, mnist):
 
-MLP (31.8M parameters) - 51 it/s, KANLinear (32.3 M parameters) - 4.3 it/s, KANLinear2 (31M parameters) - 36.5 it/s (rtx 2060 mobile, mnist)
+MLP (31.8M parameters) - 51 it/s 
+
+KANLinear (32.3 M parameters) - 4.3 it/s
+
+KANLinear2 (31M parameters) - 36.5 it/s 
 
 # Problems
 - [ ] update_grid on cuda raise error (torch.linalg.lstsq assume full rank on cuda, only one algorithm) - solved temporary, moved calculating lstsq to cpu
