@@ -20,7 +20,7 @@ See examples/ (in future)
 - [ ] update_grid_from_samples in original KAN run model multiple times, is it necessary? 
 - [ ] parameters counting, is grid parameter or not?
 - [ ] MLP training is almost instant, but KAN train slow on start
-- [ ] MLP (31.8M parameters) - 51 it/s, KANLinear (32.3 M parameters) - 4.3 it/s, KANLinear2 (3.1M parameters) - 36.5 it/s (rtx 2060 mobile, mnist)
+- [ ] MLP (31.8M parameters) - 51 it/s, KANLinear (32.3 M parameters) - 4.3 it/s, KANLinear2 (31M parameters) - 36.5 it/s (rtx 2060 mobile, mnist)
 
 # TODO/Ideas:
 - [x] Base structure
@@ -34,7 +34,7 @@ See examples/ (in future)
 - [ ] Grid extension
 - [x] MNIST
 - [ ] CIFAR10
-- [ ] More datasets?
+- [ ] KAN ResNet?
 - [ ] KAN as CNN filter?
 - [ ] KAN in VIT?
 - [ ] Fourier KAN?
