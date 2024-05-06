@@ -38,9 +38,6 @@ class BasicKANTrainer(BaseTrainer):
         self.grid_update_freq = grid_update_freq
         self.stop_grid_update_step = stop_grid_update_step
 
-    def forward(self, x):
-        return self.model(x)
-
     def training_step(self, batch: torch.Tensor, batch_idx: int) -> torch.Tensor:
         if (
             self.global_step % self.grid_update_freq == 0
@@ -63,6 +60,3 @@ class BasicKANTrainer(BaseTrainer):
             "metrics/loss": loss,
         }
         return loss, logs
-
-    def validation_log(self, batch, batch_idx, loss, logs):
-        self.logger.log_dict({f"val/{k}": v for k, v in logs.items()}, self.global_step)

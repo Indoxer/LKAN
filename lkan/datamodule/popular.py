@@ -40,8 +40,8 @@ class ImageDataModule(BaseDataModule):
         self.transform = transforms.Compose(
             [
                 transforms.ToTensor(),
-                transforms.Resize(input_size, antialias=True),
-                transforms.RandomCrop(input_size),
+                # transforms.Resize(input_size, antialias=True),
+                # transforms.RandomCrop(input_size),
             ]
         )
         self.root = root

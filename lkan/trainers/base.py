@@ -33,7 +33,7 @@ class BaseTrainer:
         self.accumulate_grad_batches = accumulate_grad_batches
 
     def forward(self, x):
-        raise NotImplementedError
+        return self.model(x)
 
     def step(self, batch, batch_idx):
         raise NotImplementedError
@@ -65,7 +65,7 @@ class BaseTrainer:
         self.model.train()
 
     def validation_log(self, batch, batch_idx, loss, logs):
-        raise NotImplementedError
+        self.logger.log_dict({f"val/{k}": v for k, v in logs.items()}, self.global_step)
 
     def fit(
         self,
