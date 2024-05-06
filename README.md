@@ -27,8 +27,8 @@ See examples/ (in future)
 - [x] KAN simple implementation
 - [x] KAN trainer
 - [x] train KAN on test dataset
-- [x] remove unnecessary dependencies in requirements.txt
-- [x] test update_grid and "Other possibilities are: (a) the grid is learnable with gradient descent" from paper. 
+- [ ] remove unnecessary dependencies in requirements.txt
+- [ ] test update_grid and "Other possibilities are: (a) the grid is learnable with gradient descent" from paper. 
 - [ ] Regularization
 - [ ] Compare with MLP
 - [ ] Grid extension
