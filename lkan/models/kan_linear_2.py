@@ -85,7 +85,7 @@ class KANLinear2(KANLinear):
 
         splines = b_splines(x, self.grid, self.k)  # [batch_size, in_dim, grid_size + k]
 
-        ####### Efficient KAN forward, without mask and scale_spline #########
+        ####### Efficient KAN forward #########
 
         batch_size = x.shape[0]
         y_b = F.linear(self.base_fun(x), self.scale_base)
