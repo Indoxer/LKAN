@@ -16,6 +16,7 @@ To view charts, run `tensorboard --logdir .experiments/`
 See examples/ (in future)
 
 Performance:
+
 MLP (31.8M parameters) - 51 it/s, KANLinear (32.3 M parameters) - 4.3 it/s, KANLinear2 (31M parameters) - 36.5 it/s (rtx 2060 mobile, mnist)
 
 # Problems
