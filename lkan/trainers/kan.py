@@ -12,6 +12,9 @@ class BasicKANTrainer(BaseTrainer):
         self,
         model: KAN,
         lr: float,
+        update_grid: bool,
+        grid_update_freq: int,
+        stop_grid_update_step: int,
         logger: CustomLogger,
         lr_scheduler: torch.optim.lr_scheduler._LRScheduler,
         lr_scheduler_params: dict,
@@ -31,16 +34,30 @@ class BasicKANTrainer(BaseTrainer):
             accumulate_grad_batches=accumulate_grad_batches,
             device=device,
         )
+        self.update_grid = update_grid
+        self.grid_update_freq = grid_update_freq
+        self.stop_grid_update_step = stop_grid_update_step
 
     def forward(self, x):
         return self.model(x)
 
+    def training_step(self, batch: torch.Tensor, batch_idx: int) -> torch.Tensor:
+        if (
+            self.global_step % self.grid_update_freq == 0
+            and self.global_step < self.stop_grid_update_step
+            and self.update_grid
+        ):
+            self.model.update_grid(batch[0])
+            print("grid updated")
+
+        return super().training_step(batch, batch_idx)
+
     def step(self, batch, batch_idx):
         x, y = batch
 
-        y = self.model(x)
+        y_pred = self.model(x)
 
-        loss = F.mse_loss(x, y)
+        loss = F.mse_loss(y_pred, y)
 
         logs = {
             "metrics/loss": loss,

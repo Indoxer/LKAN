@@ -1,7 +1,7 @@
-from msm.loggers import CustomLogger
-from msm.utils import custom_import
 from omegaconf import OmegaConf
-from torchinfo import summary
+
+from lkan.loggers import CustomLogger
+from lkan.utils import custom_import
 
 
 def run(cfg: OmegaConf, logger: CustomLogger):

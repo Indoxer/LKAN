@@ -1,2 +1,3 @@
 tmp/
 __pycache__/
+.experiments/

@@ -1,4 +1,7 @@
+import os
+
 import torch
+from numpy import save
 from omegaconf import OmegaConf
 from torch.utils.tensorboard import SummaryWriter, summary
 
@@ -17,12 +20,14 @@ def flatten_dict(d, parent_key="", sep="/"):
 class CustomLogger:
     def __init__(self, save_dir: str, name: str, version: str, cfg: OmegaConf):
         super().__init__()
+        cfg.save_dir = save_dir
+        self.save_dir, cfg = self.folder_structure(cfg)
+        save_dir = self.save_dir  # To avoid errors in future.
 
-        self.save_dir = save_dir
         self._version = version
 
         self.writer = SummaryWriter(
-            log_dir=save_dir,
+            log_dir=self.save_dir,
         )
 
         hparams = flatten_dict(cfg)
@@ -33,6 +38,23 @@ class CustomLogger:
 
         self.hparams = hparams
         self.metrics = {}
+
+    def folder_structure(self, cfg: OmegaConf):
+        new_save_dir = f"{cfg.save_dir}/run0"
+
+        i = 1
+
+        while os.path.exists(new_save_dir):
+            new_save_dir = f"{cfg.save_dir}/run{str(i)}"
+            i += 1
+
+        os.makedirs(new_save_dir, exist_ok=True)
+        os.makedirs(f"{new_save_dir}/checkpoints", exist_ok=True)
+        OmegaConf.save(cfg, f"{new_save_dir}/config.yaml")
+
+        cfg.save_dir = new_save_dir
+
+        return new_save_dir, cfg
 
     @property
     def name(self):

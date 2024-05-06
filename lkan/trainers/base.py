@@ -3,6 +3,7 @@ import itertools
 import torch
 from tqdm import tqdm
 
+from lkan.datamodule.base import BaseDataModule
 from lkan.loggers import CustomLogger
 
 
@@ -24,7 +25,8 @@ class BaseTrainer:
         self.model.to(self.device)
         self.lr = lr
         self.opt = torch.optim.Adam(self.model.parameters(), lr=lr)
-        self.lr_scheduler = lr_scheduler(optimizer=self.opt, **lr_scheduler_params)
+        if lr_scheduler is not None:
+            self.lr_scheduler = lr_scheduler(optimizer=self.opt, **lr_scheduler_params)
         self.lr_step = lr_step
         self.clip_grad_norm = clip_grad_norm
         self.logger = logger
@@ -71,7 +73,7 @@ class BaseTrainer:
         max_steps: int,
         validation_every_n_batches: int,
         save_every_n_steps: int,
-        datamodule,
+        datamodule: BaseDataModule,
     ):
         self.global_step = 0
         stop = False
@@ -87,7 +89,11 @@ class BaseTrainer:
                 self.training_step(batch, batch_idx)
                 self.global_step += 1
 
-                if self.lr_step != "epoch" and self.global_step % self.lr_step == 0:
+                if (
+                    self.lr_step not in ("epoch", None)
+                    and self.global_step % self.lr_step == 0
+                    and self.lr_scheduler is not None
+                ):
                     self.lr_scheduler.step()
 
                 if self.global_step > max_steps:
@@ -104,7 +110,7 @@ class BaseTrainer:
                             batch[i] = el.to(self.device)
                     self.validation_step(batch, batch_idx)
 
-            if self.lr_step == "epoch":
+            if self.lr_step == "epoch" and self.lr_scheduler is not None:
                 self.lr_scheduler.step()
 
             if stop:
