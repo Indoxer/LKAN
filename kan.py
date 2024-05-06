@@ -79,7 +79,7 @@ if __name__ == "__main__":
     )
 
     trainer.fit(
-        max_epochs=10,
+        max_epochs=30,
         max_steps=1000,
         validation_every_n_batches=10,
         save_every_n_steps=10,

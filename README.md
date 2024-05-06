@@ -8,6 +8,7 @@ Implementations of KAN variations.
 # Problems
 - [ ] small error in network output after update_grid (around 0.00232 max absolute difference between original model) - hard to reproduce
 - [ ] update_grid_from_samples run model multiple times, is it necessary? 
+- [ ] Unstable update_grid (loss explode)
 
 # TODO/Ideas:
 - [x] Base structure
