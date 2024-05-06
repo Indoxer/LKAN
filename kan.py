@@ -57,7 +57,7 @@ if __name__ == "__main__":
     version = "0.1"
     save_dir = f"./.experiments/{name}/{version}"
 
-    datamodule = TestDataModule(batch_size=1000)
+    datamodule = TestDataModule(batch_size=16)
     datamodule.setup()
     logger = CustomLogger(
         save_dir=save_dir, name=name, version=version, cfg=OmegaConf.create({})
@@ -65,10 +65,10 @@ if __name__ == "__main__":
 
     trainer = BasicKANTrainer(
         model=model,
-        lr=1.0,
+        lr=0.008,
         update_grid=True,
-        grid_update_freq=1,
-        stop_grid_update_step=50,
+        grid_update_freq=63,
+        stop_grid_update_step=10000,
         logger=logger,
         lr_scheduler=None,
         lr_scheduler_params={},
@@ -79,7 +79,7 @@ if __name__ == "__main__":
     )
 
     trainer.fit(
-        max_epochs=30,
+        max_epochs=10,
         max_steps=1000,
         validation_every_n_batches=10,
         save_every_n_steps=10,

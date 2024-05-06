@@ -42,13 +42,13 @@ class BasicKANTrainer(BaseTrainer):
         return self.model(x)
 
     def training_step(self, batch: torch.Tensor, batch_idx: int) -> torch.Tensor:
-        # if (
-        #     self.global_step % self.grid_update_freq == 0
-        #     and self.global_step < self.stop_grid_update_step
-        #     and self.update_grid
-        # ):
-        #     self.model.update_grid(batch[0])
-        #     print("grid updated")
+        if (
+            self.global_step % self.grid_update_freq == 0
+            and self.global_step < self.stop_grid_update_step
+            and self.update_grid
+        ):
+            self.model.update_grid(batch[0])
+            print("grid updated")
 
         return super().training_step(batch, batch_idx)
 
