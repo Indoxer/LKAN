@@ -75,6 +75,17 @@ class BaseTrainer:
         save_every_n_steps: int,
         datamodule: BaseDataModule,
     ):
+
+        # prof = torch.profiler.profile(
+        #     schedule=torch.profiler.schedule(wait=1, warmup=1, active=3, repeat=1),
+        #     on_trace_ready=torch.profiler.tensorboard_trace_handler(
+        #         self.logger.save_dir
+        #     ),
+        #     record_shapes=True,
+        #     profile_memory=True,
+        #     with_stack=True,
+        # )
+        # prof.start()
         self.global_step = 0
         stop = False
         validation_dataloader = iter(itertools.cycle(datamodule.val_dataloader()))
@@ -88,6 +99,7 @@ class BaseTrainer:
 
                 self.training_step(batch, batch_idx)
                 self.global_step += 1
+                # prof.step()
 
                 if (
                     self.lr_step not in ("epoch", None)
@@ -115,3 +127,4 @@ class BaseTrainer:
 
             if stop:
                 break
+        # prof.stop()
