@@ -32,13 +32,15 @@ See examples/ (in future)
 - [x] MNIST
 - [ ] CIFAR10
 - [ ] More datasets?
-- [ ] KAN as CNN filter, KAN in VIT?
+- [ ] KAN as CNN filter?
+- [ ] KAN in VIT?
 - [ ] Fourier KAN?
 - [ ] pruning
 - [ ] test continual learning
 - [ ] docs and examples - write notebooks like in KAN repo.
 - [ ] KAN vs MLP in "LLM" - test?
 - [ ] CUDA kernel for b_splines?
+- [ ] unit tests?
 
 # Citations
 ```python
