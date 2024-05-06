@@ -88,6 +88,8 @@ class KANLinear(torch.nn.Module):
 
         splines = b_splines(x, self.grid, self.k)  # [batch_size, in_dim, grid_size + k]
 
+        ############## "Original" KAN forward #################
+
         # [out_dim, in_dim]*[batch_size, 1, in_dim] = [batch_size, out_dim, in_dim]
         y_b = self.scale_base * self.base_fun(x).unsqueeze(1)
 
@@ -107,6 +109,8 @@ class KANLinear(torch.nn.Module):
         y = torch.sum(y, dim=2) + self.bias
 
         y = y.view(*shape, self.out_dim)
+
+        ######################################################
 
         return y
 
