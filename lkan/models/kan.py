@@ -2,8 +2,8 @@ import enum
 
 import torch
 
-from .kan_layer import KANLayer
-from .kan_layer_b import KANLayerB
+from .kan_linear import KANLinear
+from .kan_linear_b import KANLinearB
 
 
 class KAN(torch.nn.Module):
@@ -33,7 +33,7 @@ class KAN(torch.nn.Module):
 
         for in_dim, out_dim in zip(layers_dims, layers_dims[1:]):
             if kan_layer_version == "b":
-                layer = KANLayerB(
+                layer = KANLinearB(
                     in_dim=in_dim,
                     out_dim=out_dim,
                     grid_size=grid_size,
@@ -47,7 +47,7 @@ class KAN(torch.nn.Module):
                     device=device,
                 )
             else:
-                layer = KANLayer(
+                layer = KANLinear(
                     in_dim=in_dim,
                     out_dim=out_dim,
                     grid_size=grid_size,

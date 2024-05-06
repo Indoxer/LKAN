@@ -5,7 +5,7 @@ import torch.nn.functional as F
 from lkan.utils.kan import b_splines, curve2coeff
 
 
-class KANLayer(torch.nn.Module):
+class KANLinear(torch.nn.Module):
     def __init__(
         self,
         in_dim,
@@ -82,6 +82,8 @@ class KANLayer(torch.nn.Module):
         )
 
     def forward(self, x):
+        shape = x.shape[:-1]
+        x = x.view(-1, self.in_dim)
         # x [batch, in_dim]
 
         splines = b_splines(x, self.grid, self.k)  # [batch_size, in_dim, grid_size + k]
@@ -103,6 +105,8 @@ class KANLayer(torch.nn.Module):
 
         # [batch_size, out_dim] + [1, out_dim]
         y = torch.sum(y, dim=2) + self.bias
+
+        y = y.view(*shape, self.out_dim)
 
         return y
 
