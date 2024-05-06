@@ -7,6 +7,9 @@ Implementations of KAN variations.
 pip install .
 ```
 
+To run mnist select config in `main.py` and run `main.py`
+To view charts, run `tensorboard --logdir .experiments/`
+
 # Docs
 
 See examples/ (in future)
