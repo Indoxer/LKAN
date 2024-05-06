@@ -51,5 +51,8 @@ See examples/ (in future)
       primaryClass={cs.LG}
 }
 ```
+```
 Original KAN repo - https://github.com/KindXiaoming/pykan
 efficient-kan - https://github.com/Blealtan/efficient-kan
+```
+
