@@ -3,7 +3,12 @@ Implementations of KAN variations.
 
 # Installation
 
+```
+pip install .
+
 # Docs
+
+See examples/ (in future)
 
 # Problems
 - [ ] small error in network output after update_grid (around 0.00232 max absolute difference between original model) - hard to reproduce
@@ -13,8 +18,9 @@ Implementations of KAN variations.
 # TODO/Ideas:
 - [x] Base structure
 - [x] KAN simple implementation
-- [ ] KAN trainer
-- [ ] train KAN on test dataset
+- [x] KAN trainer
+- [x] train KAN on test dataset
+- [x] remove unnecessary dependencies in requirements.txt
 - [ ] test update_grid and "Other possibilities are: (a) the grid is learnable with gradient descent" from paper
 - [ ] Regularization
 - [ ] Grid extension
