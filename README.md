@@ -25,9 +25,6 @@ Implementations of KAN variations.
 - [ ] testing continual learning
 - [ ] KAN vs MLP in "LLM" test?
 
-## Propably avoid:
-- symbolic representation - in my opinion it create confusion in code, create code hard to edit and is not suitable for bigger networks (propably is better only for physics problems)
-
 # Citations
 ```python
 @misc{liu2024kan,

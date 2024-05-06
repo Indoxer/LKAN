@@ -1,11 +1,9 @@
 import itertools
 
 import torch
-from cv2 import accumulate
-from msm.loggers import CustomLogger
 from tqdm import tqdm
 
-# structure for trainer from my older project.
+from lkan.loggers import CustomLogger
 
 
 class BaseTrainer:
@@ -17,6 +15,7 @@ class BaseTrainer:
         lr_scheduler: torch.optim.lr_scheduler._LRScheduler,
         lr_scheduler_params: dict,
         lr_step: str,
+        clip_grad_norm: float,
         accumulate_grad_batches: int,
         device: str,
     ) -> None:
@@ -27,6 +26,7 @@ class BaseTrainer:
         self.opt = torch.optim.Adam(self.model.parameters(), lr=lr)
         self.lr_scheduler = lr_scheduler(optimizer=self.opt, **lr_scheduler_params)
         self.lr_step = lr_step
+        self.clip_grad_norm = clip_grad_norm
         self.logger = logger
         self.accumulate_grad_batches = accumulate_grad_batches
 
@@ -42,7 +42,7 @@ class BaseTrainer:
         self.opt.zero_grad()
         loss.backward()
         if self.global_step % self.accumulate_grad_batches == 0:
-            torch.nn.utils.clip_grad_norm_(self.model.parameters(), 0.4)
+            torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.clip_grad_norm)
             self.opt.step()
 
         logs["lr"] = self.opt.param_groups[0]["lr"]

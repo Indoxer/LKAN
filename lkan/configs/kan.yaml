@@ -1,0 +1,42 @@
+script: lkan.scripts.train
+model: msm.models.VAE
+model_params:
+  layers_dims: [4,4,4]
+  grid_number: 5
+  k: 3
+  noise_scale: 0.1
+  noise_scale_base: 0.1
+  scale_spline: 1.0
+  base_fun: silu
+  grid_eps: 1.0
+  grid_range: [-1, 1]
+  bias_trainable: true
+  sp_trainable: true
+  sb_trainable: true
+  device: ${trainer_params.device}
+trainer: msm.trainers.VAETrainer
+trainer_params:
+    kl_coeff: 0.0
+    mse_coeff: 1.0
+    lr: 0.003
+    lr_step: 2000
+    accumulate_grad_batches: 1
+    device: cuda
+lr_scheduler: torch.optim.lr_scheduler.StepLR
+lr_scheduler_params:
+  step_size: 1
+  gamma: 1.0
+train_params:
+  max_epochs: 100
+  max_steps: 10000
+  validation_every_n_batches: 100
+  save_every_n_steps: 2500
+datamodule: # here datamodule
+datamodule_params:
+  root: ./.data/processed
+  input_size: 32
+  batch_size: 32
+  split_ratio: 0.8
+save_dir: ./.experiments/${name}/${version}
+name: vae
+version: v1

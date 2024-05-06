@@ -25,6 +25,10 @@ class KAN(torch.nn.Module):
         super().__init__()
         self.layers = torch.nn.ModuleList()
 
+        if isinstance(base_fun, str):
+            if base_fun == "silu":
+                base_fun = torch.nn.SiLU()
+
         for in_dim, out_dim in zip(layers_dims, layers_dims[1:]):
             self.layers.append(
                 KANLayer(
