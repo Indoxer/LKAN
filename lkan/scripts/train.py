@@ -7,6 +7,10 @@ from lkan.utils import custom_import
 def run(cfg: OmegaConf, logger: CustomLogger):
     model = custom_import(cfg.model)(**cfg.model_params)
 
+    total_params = sum(p.numel() for p in model.parameters())
+
+    print("Total number of parameters: ", total_params)
+
     datamodule = custom_import(cfg.datamodule)(**cfg.datamodule_params)
     datamodule.setup()
 
