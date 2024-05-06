@@ -16,7 +16,7 @@ To view charts, run `tensorboard --logdir .experiments/`
 See examples/ (in future)
 
 # Problems
-- [ ] update_grid for MNIST raise errors (big parts of images are zero, so torch.linalg.lstsq raise error)
+- [ ] update_grid on cuda raise error (torch.linalg.lstsq assume full rank on cuda, only one algorithm) - solved temporary, moved calculating lstsq to cpu
 - [ ] update_grid_from_samples in original KAN run model multiple times, is it necessary? 
 - [ ] parameters counting, is grid parameter or not?
 - [ ] MLP training is almost instant, but KAN train slow on start

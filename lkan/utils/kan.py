@@ -43,11 +43,15 @@ def curve2coeff(x, y, grid, k, eps=1e-8):
 
     splines = b_splines(x, grid, k).transpose(0, 1)
 
+    device = splines.device
+    if device != "cpu":
+        splines = splines.cpu()
+        y = y.cpu()
+
     # [in_dim, batch_size, grid_size + k] @ [in_dim, grid_size + k, out_dim] - [in_dim, batch_size, out_dim] = 0
-    value = torch.linalg.lstsq(
-        splines,
-        y.transpose(0, 1),
-    ).solution
+    value = torch.linalg.lstsq(splines, y.transpose(0, 1)).solution
+
+    value = value.to(device)
 
     # [in_dim, grid_size + k, out_dim] -> [out_dim, in_dim, grid_size + k]
     value = value.permute(2, 0, 1)

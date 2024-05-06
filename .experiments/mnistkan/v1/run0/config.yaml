@@ -11,7 +11,7 @@ model_params:
   noise_scale_base: 0.1
   scale_spline: 1.0
   base_fun: silu
-  grid_eps: 0.02
+  grid_eps: 1.0
   grid_range:
   - -1
   - 1
@@ -24,8 +24,8 @@ trainer: lkan.trainers.ImgKANTrainer
 trainer_params:
   lr: 0.0003
   update_grid: false
-  grid_update_freq: 63
-  stop_grid_update_step: 10000
+  grid_update_freq: 4
+  stop_grid_update_step: 100
   lr_step: null
   clip_grad_norm: 0.5
   accumulate_grad_batches: 1
