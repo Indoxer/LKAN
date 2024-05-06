@@ -48,7 +48,7 @@ class KAN(torch.nn.Module):
                     sb_trainable=sb_trainable,
                     device=device,
                 )
-            else:
+            elif kan_layer_version == "normal":
                 layer = KANLinear(
                     in_dim=in_dim,
                     out_dim=out_dim,
@@ -65,6 +65,8 @@ class KAN(torch.nn.Module):
                     sb_trainable=sb_trainable,
                     device=device,
                 )
+            else:
+                raise ValueError(f"Unknown kan_layer_version: {kan_layer_version}")
             self.layers.append(layer)
 
     def update_grid(self, x):

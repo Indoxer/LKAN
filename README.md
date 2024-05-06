@@ -20,7 +20,7 @@ See examples/ (in future)
 - [ ] update_grid_from_samples in original KAN run model multiple times, is it necessary? 
 - [ ] parameters counting, is grid parameter or not?
 - [ ] MLP training is almost instant, but KAN train slow on start
-- [ ] MLP (around 230 it/s), KAN (around 130 it/s), need optimization. Maybe worse, data flow can be bootleneck for MLP
+- [ ] MLP (31.8M parameters) - 51 it/s, KANLinear (32.3 M parameters) - 4.3 it/s, KANLinear2 (3.1M parameters) - 36.5 it/s (rtx 2060 mobile, mnist)
 
 # TODO/Ideas:
 - [x] Base structure
