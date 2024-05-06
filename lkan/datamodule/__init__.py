@@ -1,2 +1,7 @@
 from .base import BaseDataModule
-from .popular import CIFAR10DataModule, FashionMNISTDataModule, MNISTDataModule
+from .popular import (
+    CIFAR10DataModule,
+    FashionMNISTDataModule,
+    MNISTDataModule,
+    TestDataModule,
+)

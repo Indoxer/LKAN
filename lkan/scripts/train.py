@@ -10,7 +10,10 @@ def run(cfg: OmegaConf, logger: CustomLogger):
     datamodule = custom_import(cfg.datamodule)(**cfg.datamodule_params)
     datamodule.setup()
 
-    lr_scheduler = custom_import(cfg.lr_scheduler)
+    if cfg.lr_scheduler is not None:
+        lr_scheduler = custom_import(cfg.lr_scheduler)
+    else:
+        lr_scheduler = None
 
     trainer = custom_import(cfg.trainer)(
         model=model,

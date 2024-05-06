@@ -71,7 +71,7 @@ class BaseTrainer:
         self,
         max_epochs: int,
         max_steps: int,
-        validation_every_n_batches: int,
+        validation_every_n_steps: int,
         save_every_n_steps: int,
         datamodule: BaseDataModule,
     ):
@@ -103,7 +103,7 @@ class BaseTrainer:
                 if self.global_step % save_every_n_steps == 0:
                     self.logger.save_model(self.model, self.global_step)
 
-                if batch_idx % validation_every_n_batches == 0:
+                if batch_idx % validation_every_n_steps == 0:
                     batch = next(validation_dataloader)
                     for i, el in enumerate(batch):
                         if isinstance(el, torch.Tensor):

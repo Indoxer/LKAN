@@ -1,12 +1,11 @@
 import torch
 from omegaconf import OmegaConf
 
-from lkan.datamodule import BaseDataModule
+from lkan.datamodule import TestDataModule
 from lkan.loggers import CustomLogger
 from lkan.models import KAN
 from lkan.trainers import BasicKANTrainer
 from tmp.pykan.kan import KAN as KAN_real
-from tmp.pykan.kan import create_dataset
 
 # testing the KAN model
 
@@ -32,23 +31,6 @@ from tmp.pykan.kan import create_dataset
 #     print(f"max diff: {torch.max(torch.abs(out - real_out))}")
 
 
-class TestDataModule(BaseDataModule):
-    def __init__(self, batch_size: int):
-        self.batch_size = batch_size
-
-    def setup(self):
-        f = lambda x: torch.exp(torch.sin(torch.pi * x[:, [0]]) + x[:, [1]] ** 2)
-
-        dataset = create_dataset(f, n_var=2)
-
-        self.train = torch.utils.data.TensorDataset(
-            dataset["train_input"], dataset["train_label"]
-        )
-        self.val = torch.utils.data.TensorDataset(
-            dataset["test_input"], dataset["test_label"]
-        )
-
-
 if __name__ == "__main__":
 
     model = KAN(layers_dims=[2, 5, 1])
@@ -57,7 +39,7 @@ if __name__ == "__main__":
     version = "0.1"
     save_dir = f"./.experiments/{name}/{version}"
 
-    datamodule = TestDataModule(batch_size=16)
+    datamodule = TestDataModule(batch_size=16, split_ratio=0.8)
     datamodule.setup()
     logger = CustomLogger(
         save_dir=save_dir, name=name, version=version, cfg=OmegaConf.create({})
@@ -65,8 +47,8 @@ if __name__ == "__main__":
 
     trainer = BasicKANTrainer(
         model=model,
-        lr=0.008,
-        update_grid=True,
+        lr=0.01,
+        update_grid=False,
         grid_update_freq=63,
         stop_grid_update_step=10000,
         logger=logger,
@@ -81,7 +63,7 @@ if __name__ == "__main__":
     trainer.fit(
         max_epochs=10,
         max_steps=1000,
-        validation_every_n_batches=10,
+        validation_every_n_steps=10,
         save_every_n_steps=10,
         datamodule=datamodule,
     )
