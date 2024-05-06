@@ -47,12 +47,13 @@ class KAN(torch.nn.Module):
 
     def update_grid(self, x):
         for i, layer in enumerate(self.layers):
-            y = x.clone()
-            for l in self.layers[:i]:
-                y = l(y)
+            # Not sure if removing this is the correct, but results are close
+            # y = x.clone()
+            # for l in self.layers[:i]:
+            #     y = l(y)
 
-            print(y)
-            layer.update_grid(y)
+            layer.update_grid(x)
+            x = layer(x)  # just one pass
 
     def forward(self, x):
         for layer in self.layers:

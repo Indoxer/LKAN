@@ -74,22 +74,14 @@ class KANLayer(torch.nn.Module):
             torch.zeros(out_dim, device=device), requires_grad=bias_trainable
         )
 
+    # TODO: Refactor this function
     @torch.no_grad()
     def update_grid(self, x, margin=0.01):
 
-        # batch_size = x.shape[0]
-
-        # x = x.repeat(1, self.out_dim, 1).reshape(, self.size).permute(1, 0)
+        batch_size = x.shape[0]
         batch = x.shape[0]
-        x = (
-            torch.einsum(
-                "ij,k->ikj",
-                x,
-                torch.ones(self.out_dim, device=self.device),
-            )
-            .reshape(batch, self.size)
-            .permute(1, 0)
-        )
+
+        x = x.repeat(1, self.out_dim).reshape(batch_size, self.size).permute(1, 0)
         x_pos = torch.sort(x, dim=1)[0]
         y_eval = coeff2curve(x_pos, self.grid, self.coeff, self.k)
         ids = [int(batch / self.grid_number * i) for i in range(self.grid_number)] + [

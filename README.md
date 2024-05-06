@@ -6,12 +6,16 @@ Implementations of KAN variations.
 # Docs
 
 # Problems
-- [ ] small error in network output after update_grid (around 0.00232 max absolute difference between original model) - hard to reproduce, error is seen after first layer.
-- [ ] update_grid run model multiple times, is it necessary?
+- [ ] small error in network output after update_grid (around 0.00232 max absolute difference between original model) - hard to reproduce
+- [ ] update_grid_from_samples run model multiple times, is it necessary? 
 
 # TODO/Ideas:
-- [ ] Base structure
-- [ ] KAN implementation
+- [x] Base structure
+- [x] KAN simple implementation
+- [ ] KAN trainer
+- [ ] train KAN on test dataset
+- [ ] test update_grid and "Other possibilities are: (a) the grid is learnable with gradient descent" from paper
+- [ ] Regularization
 - [ ] Grid extension
 - [ ] More real datasets?
 - [ ] MNIST
