@@ -74,9 +74,6 @@ class KANLinear(torch.nn.Module):
             requires_grad=sp_trainable,
         )  # [1, size]
 
-        self.mask = torch.nn.Parameter(
-            torch.ones(self.out_dim, self.in_dim, device=device)
-        )
         if bias:
             self.bias = torch.nn.Parameter(
                 torch.zeros(1, out_dim, device=device), requires_grad=bias_trainable
@@ -106,7 +103,7 @@ class KANLinear(torch.nn.Module):
         y_spline = self.scale_spline * y_spline
 
         # [batch_size, out_dim, in_dim] * [batch_size, out_dim, in_dim]
-        y = self.mask * (y_b + y_spline)
+        y = y_b + y_spline
 
         # [batch_size, out_dim] + [1, out_dim]
         y = torch.sum(y, dim=2)
