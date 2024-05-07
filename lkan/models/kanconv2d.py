@@ -15,7 +15,7 @@ class KANConv2d(torch.nn.Module):
         stride=1,
         padding=0,
         dilation=1,
-        bias=False,
+        bias=True,
         device="cpu",
     ):
         super().__init__()

@@ -2,3 +2,7 @@ tmp/
 __pycache__/
 .data/
 checkpoints/
+build/
+Large_Kolmogorov_Arnold_Networks.egg-info
+dist/
+LKAN.egg-info/
