@@ -47,8 +47,8 @@ class KANConv2d(torch.nn.Module):
         x = self.unfold(x).permute(0, 2, 1).contiguous()
 
         x = self.kernel(x)
-        if self.bias:
-            x = x + self.bias[None, :, None]
+        if self.bias is not False:
+            x = x + self.bias[None, None, :]
 
         h = math.floor(
             (shape[-2] + 2 * self.padding - self.dilation * (self.kernel_size - 1) - 1)
