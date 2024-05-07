@@ -4,17 +4,16 @@ import torch.nn.functional as F
 
 from lkan.utils.kan import b_splines, curve2coeff
 
-from .kan_linear import KANLinear
+from .kan_linear_2 import KANLinear2
 
 
 # copy-paste
-class KANLinear2(KANLinear):
+class KANLinearFFT(KANLinear2):
     def __init__(
         self,
         in_dim,
         out_dim,
         grid_size=5,
-        k=3,
         noise_scale=0.1,
         noise_scale_base=0.1,
         scale_spline=None,
@@ -62,14 +61,8 @@ class KANLinear2(KANLinear):
             / self.grid_size
         )
         self.coeff = torch.nn.Parameter(
-            curve2coeff(
-                x=self.grid.T[k:-k],  # [grid_size + 1, in_dim]
-                y=noise,  # [grid_size + 1, in_dim, out_dim]
-                grid=self.grid,
-                k=k,
-            ).contiguous()
+            torch.zeros(out_dim, in_dim, grid_size * 2, device=device)
         )  # [out_dim, in_dim, grid_size + k]
-
         self.scale_base = torch.nn.Parameter(
             (
                 1 / (in_dim**0.5)

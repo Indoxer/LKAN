@@ -5,7 +5,8 @@ from lkan.datamodule import TestDataModule
 from lkan.loggers import CustomLogger
 from lkan.models import KAN
 from lkan.trainers import BasicKANTrainer
-from tmp.pykan.kan import KAN as KAN_real
+
+# from tmp.pykan.kan import KAN as KAN_real
 
 if __name__ == "__main__":
 

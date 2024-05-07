@@ -1,4 +1,3 @@
-import numpy as np
 import torch
 import torch.nn.functional as F
 
@@ -6,8 +5,10 @@ from lkan.utils.kan import b_splines, curve2coeff
 
 from .kan_linear import KANLinear
 
+# Placeholder for new faster KANConv2d
 
-class KANLinear2(KANLinear):
+
+class FastKANConv2d(KANLinear):
     def __init__(
         self,
         in_dim,
