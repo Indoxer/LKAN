@@ -13,18 +13,39 @@ else:
     device = torch.device("cpu")
 
 
-class Model(nn.Module):
+class MLP(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.layers = nn.Sequential(
+            nn.Conv2d(
+                in_channels=1, out_channels=32, kernel_size=5, stride=1, padding=2
+            ),
+            nn.ReLU(),
+            nn.MaxPool2d(2),
+            nn.Conv2d(32, 32, 5, 1, 2),
+            nn.ReLU(),
+            nn.MaxPool2d(2),
+            nn.Flatten(),
+            nn.Linear(32 * 7 * 7, 10),
+        )
+
+    def forward(self, x):
+        x = self.layers(x)
+        return x
+
+
+class KAN(nn.Module):
     def __init__(self):
         super().__init__()
         self.layers = nn.Sequential(
             KANConv2d(
-                in_channels=1, out_channels=16, kernel_size=5, stride=1, padding=2
+                in_channels=1, out_channels=4, kernel_size=5, stride=1, padding=2
             ),
             nn.MaxPool2d(2),
-            KANConv2d(16, 32, 5, 1, 2),
+            KANConv2d(4, 8, 5, 1, 2),
             nn.MaxPool2d(2),
             nn.Flatten(),
-            KANLinear2(32 * 7 * 7, 10),
+            KANLinear2(8 * 7 * 7, 10),
         )
 
     def forward(self, x):
@@ -37,7 +58,7 @@ data_dir = ".data/"
 batch_size = 64
 split_ratio = 0.8
 
-lr = 0.001
+lr = 0.002
 epochs = 5
 
 transform = torchvision.transforms.Compose(
@@ -56,9 +77,25 @@ loader_train = torch.utils.data.DataLoader(
     ds_train, batch_size=batch_size, shuffle=True
 )
 
-model = Model().to(device)
+# model = MLP().to(device)
+model = KAN().to(device)
+
+counter = 0
+for param in model.parameters():
+    counter += param.numel()
+
+print(f"Number of parameters: {counter}")
 
 opt = torch.optim.Adam(model.parameters(), lr=lr)
+
+# prof = torch.profiler.profile(
+#     schedule=torch.profiler.schedule(wait=1, warmup=1, active=3, repeat=1),
+#     on_trace_ready=torch.profiler.tensorboard_trace_handler(save_dir),
+#     record_shapes=True,
+#     profile_memory=True,
+#     with_stack=True,
+# )
+# prof.start()
 
 for epoch in range(epochs):
     train_acc = 0
@@ -73,6 +110,7 @@ for epoch in range(epochs):
 
         loss.backward()
         opt.step()
+        # prof.step()
 
         train_acc += (y_pred.argmax(1) == y).float().mean().item()
         avg_train_loss += loss.item()
@@ -94,3 +132,5 @@ for epoch in range(epochs):
         print(
             f"Epoch {epoch+1}/{epochs} - Train Loss: {avg_train_loss} - Val Loss: {avg_loss} - Train Acc: {train_acc} -Val Acc: {acc}"
         )
+
+# prof.stop()

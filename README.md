@@ -11,17 +11,29 @@ To run mnist select config in `main.py` and run `main.py`.
 
 To view charts, run `tensorboard --logdir .experiments/`
 
-# Docs
+# Info
 
-See examples/ (in future)
-
-Performance (rtx 2060 mobile, mnist):
+## Performance (rtx 2060 mobile, mnist):
 
 MLP (31.8M parameters) - 51 it/s 
 
 KANLinear (32.3 M parameters) - 4.3 it/s
 
 KANLinear2 (31M parameters) - 36.5 it/s 
+
+## KANConv2d on MNIST (On MNIST works almost anything, I will try CIFAR10):
+
+`test_conv.py` - file with training code
+
+MNIST, batch_size=64, epochs=5, lr=0.0005
+
+MLP (42154 parameters) 98,85% accuracy (130 it/s - memory bootleneck on MNIST, so real performance is better)
+
+KAN (43392 parameters) - 98,24% accuracy (19 it/s - need optimization)
+
+# Docs
+
+See examples/ (in future)
 
 # Problems
 - [ ] update_grid on cuda raise error (torch.linalg.lstsq assume full rank on cuda, only one algorithm) - solved temporary, moved calculating lstsq to cpu
