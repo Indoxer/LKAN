@@ -3,7 +3,7 @@ import math
 import torch
 import torch.nn.functional as F
 
-from .kan_linear_2 import KANLinear2
+from .kan_linear_fft import KANLinearFFT
 
 
 class KANConv2d(torch.nn.Module):
@@ -29,7 +29,7 @@ class KANConv2d(torch.nn.Module):
         self.kernels = torch.nn.ModuleList()
         for _ in range(in_channels):
             self.kernels.append(
-                KANLinear2(kernel_size * kernel_size, out_channels, device=device)
+                KANLinearFFT(kernel_size * kernel_size, out_channels, device=device)
             )
 
         if bias:

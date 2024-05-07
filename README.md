@@ -27,11 +27,11 @@ KANLinearFFT (33M parameters) - 40 it/s
 
 `test_conv.py` - file with training code
 
-MNIST, batch_size=64, epochs=5, lr=0.002
+MNIST, batch_size=64, epochs=5, lr=0.0003
 
 Normal CNN (42154 parameters) 98,85% accuracy (130 it/s - memory bootleneck on MNIST, so real performance is better)
 
-Convolution KAN (43392 parameters) - 98,24% accuracy (19 it/s - need optimization)
+Convolution KAN (40000 parameters) - 97,3% accuracy (need hyperparameter tuning or architecture change, KANLinearFFT is problematic in small size because O(N^2*L*2*G), for small N and L like CNN kernels, 2*G is significant) (44 it/s - need more optimization)
 
 # Docs
 

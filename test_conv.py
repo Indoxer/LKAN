@@ -5,7 +5,7 @@ import torchvision
 from sympy import Max
 from tqdm import tqdm
 
-from lkan.models import KANConv2d, KANLinear2
+from lkan.models import KANConv2d, KANLinearFFT
 
 if torch.cuda.is_available():
     device = torch.device("cuda")
@@ -42,10 +42,10 @@ class KAN(nn.Module):
                 in_channels=1, out_channels=4, kernel_size=5, stride=1, padding=2
             ),
             nn.MaxPool2d(2),
-            KANConv2d(4, 8, 5, 1, 2),
+            KANConv2d(4, 6, 5, 1, 2),
             nn.MaxPool2d(2),
             nn.Flatten(),
-            KANLinear2(8 * 7 * 7, 10),
+            KANLinearFFT(6 * 7 * 7, 10),
         )
 
     def forward(self, x):
@@ -58,7 +58,7 @@ data_dir = ".data/"
 batch_size = 64
 split_ratio = 0.8
 
-lr = 0.002
+lr = 0.0003
 epochs = 5
 
 transform = torchvision.transforms.Compose(
