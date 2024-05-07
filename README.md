@@ -25,7 +25,7 @@ KANLinear2 (31M parameters) - 36.5 it/s
 
 `test_conv.py` - file with training code
 
-MNIST, batch_size=64, epochs=5, lr=0.0005
+MNIST, batch_size=64, epochs=5, lr=0.002
 
 MLP (42154 parameters) 98,85% accuracy (130 it/s - memory bootleneck on MNIST, so real performance is better)
 
