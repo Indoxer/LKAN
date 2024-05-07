@@ -21,6 +21,8 @@ KANLinear (32.3 M parameters) - 4.3 it/s
 
 KANLinear2 (31M parameters) - 36.5 it/s 
 
+KANLinearFFT (33M parameters) - 40 it/s
+
 ## KANConv2d on MNIST:
 
 `test_conv.py` - file with training code

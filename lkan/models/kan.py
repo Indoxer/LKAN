@@ -4,6 +4,7 @@ import torch
 
 from .kan_linear import KANLinear
 from .kan_linear_2 import KANLinear2
+from .kan_linear_fft import KANLinearFFT
 
 
 class KAN(torch.nn.Module):
@@ -16,6 +17,7 @@ class KAN(torch.nn.Module):
         noise_scale_base=0.1,
         scale_spline=1.0,
         base_fun=torch.nn.SiLU(),
+        bias=True,
         grid_eps=1.0,
         grid_range=[-1, 1],
         bias_trainable=True,
@@ -44,6 +46,7 @@ class KAN(torch.nn.Module):
                     base_fun=base_fun,
                     grid_eps=grid_eps,
                     grid_range=grid_range,
+                    bias=bias,
                     sp_trainable=sp_trainable,
                     sb_trainable=sb_trainable,
                     device=device,
@@ -60,6 +63,22 @@ class KAN(torch.nn.Module):
                     base_fun=base_fun,
                     grid_eps=grid_eps,
                     grid_range=grid_range,
+                    bias=bias,
+                    bias_trainable=bias_trainable,
+                    sp_trainable=sp_trainable,
+                    sb_trainable=sb_trainable,
+                    device=device,
+                )
+            elif kan_layer_version == "fft":
+                layer = KANLinearFFT(
+                    in_dim=in_dim,
+                    out_dim=out_dim,
+                    grid_size=grid_size,
+                    noise_scale=noise_scale,
+                    noise_scale_base=noise_scale_base,
+                    scale_spline=scale_spline,
+                    base_fun=base_fun,
+                    bias=bias,
                     bias_trainable=bias_trainable,
                     sp_trainable=sp_trainable,
                     sb_trainable=sb_trainable,

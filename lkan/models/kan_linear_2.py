@@ -60,7 +60,7 @@ class KANLinear2(KANLinear):
         noise = (
             (torch.rand(grid_size + 1, in_dim, out_dim, device=device) - 1 / 2)
             * noise_scale
-            / self.grid_size
+            / self.grid_size  # TODO: (np.sqrt(in_dim) * np.sqrt(grid_size)) ?
         )
         self.coeff = torch.nn.Parameter(
             curve2coeff(

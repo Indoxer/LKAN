@@ -2,7 +2,7 @@ script: lkan.scripts.train
 model: lkan.models.KAN
 model_params:
   layers_dims: [2,5,1]
-  grid_size: 5
+  grid_size: 3
   k: 3
   noise_scale: 0.1
   noise_scale_base: 0.1
@@ -10,15 +10,16 @@ model_params:
   base_fun: silu
   grid_eps: 0.02
   grid_range: [-1, 1]
+  bias: true
   bias_trainable: true
   sp_trainable: true
   sb_trainable: true
-  kan_layer_version: normal
+  kan_layer_version: fft
   device: ${trainer_params.device}
 trainer: lkan.trainers.BasicKANTrainer
 trainer_params:
     lr: 0.001
-    update_grid: true
+    update_grid: false
     grid_update_freq: 63
     stop_grid_update_step: 10000
     lr_step: null
@@ -34,6 +35,7 @@ train_params:
   save_every_n_steps: 2500
 datamodule: lkan.datamodule.TestDataModule
 datamodule_params:
+  n_samples: 10000
   batch_size: 64
   split_ratio: 0.8
 save_dir: ./.experiments/${name}/${version}

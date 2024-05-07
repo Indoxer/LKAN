@@ -16,6 +16,7 @@ class KANLinear(torch.nn.Module):
         noise_scale_base=0.1,
         scale_spline=1.0,
         base_fun=torch.nn.SiLU(),
+        bias=True,
         grid_eps=0.02,
         grid_range=[-1, +1],
         bias_trainable=True,
@@ -76,10 +77,12 @@ class KANLinear(torch.nn.Module):
         self.mask = torch.nn.Parameter(
             torch.ones(self.out_dim, self.in_dim, device=device)
         )
-
-        self.bias = torch.nn.Parameter(
-            torch.zeros(1, out_dim, device=device), requires_grad=bias_trainable
-        )
+        if bias:
+            self.bias = torch.nn.Parameter(
+                torch.zeros(1, out_dim, device=device), requires_grad=bias_trainable
+            )
+        else:
+            self.bias = None
 
     def forward(self, x):
         shape = x.shape[:-1]
@@ -106,7 +109,10 @@ class KANLinear(torch.nn.Module):
         y = self.mask * (y_b + y_spline)
 
         # [batch_size, out_dim] + [1, out_dim]
-        y = torch.sum(y, dim=2) + self.bias
+        y = torch.sum(y, dim=2)
+
+        if self.bias is not None:
+            y = y + self.bias
 
         y = y.view(*shape, self.out_dim)
 

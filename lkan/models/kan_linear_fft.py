@@ -2,13 +2,8 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-from lkan.utils.kan import b_splines, curve2coeff
 
-from .kan_linear_2 import KANLinear2
-
-
-# copy-paste
-class KANLinearFFT(KANLinear2):
+class KANLinearFFT(torch.nn.Module):
     def __init__(
         self,
         in_dim,
@@ -18,8 +13,8 @@ class KANLinearFFT(KANLinear2):
         noise_scale_base=0.1,
         scale_spline=None,
         base_fun=torch.nn.SiLU(),
-        grid_eps=0.02,
-        grid_range=[-1, +1],
+        bias=False,
+        bias_trainable=True,
         sp_trainable=True,
         sb_trainable=True,
         device="cpu",
@@ -27,18 +22,15 @@ class KANLinearFFT(KANLinear2):
         torch.nn.Module.__init__(self)
         self.in_dim = in_dim
         self.out_dim = out_dim
-        self.k = k
         self.base_fun = base_fun
-        self.grid_eps = grid_eps
         self.size = in_dim * out_dim
         self.grid_size = grid_size
         self.device = device
 
-        step = (grid_range[1] - grid_range[0]) / grid_size
-        grid = (
-            torch.arange(-k, grid_size + k + 1, device=device) * step + grid_range[0]
-        ).repeat(self.in_dim, 1)
-        self.register_buffer("grid", grid)  # grid [in_dim, grid_size + 2*k + 1]
+        k = torch.arange(1, self.grid_size + 1, device=device).view(
+            1, 1, self.grid_size
+        )
+        self.register_buffer("k", k)
 
         if scale_spline is not None:
             self.scale_spline = torch.nn.Parameter(
@@ -55,14 +47,12 @@ class KANLinearFFT(KANLinear2):
         else:
             self.register_buffer("scale_spline", torch.tensor([1.0], device=device))
 
-        noise = (
-            (torch.rand(grid_size + 1, in_dim, out_dim, device=device) - 1 / 2)
-            * noise_scale
-            / self.grid_size
-        )
         self.coeff = torch.nn.Parameter(
-            torch.zeros(out_dim, in_dim, grid_size * 2, device=device)
-        )  # [out_dim, in_dim, grid_size + k]
+            torch.rand(2, out_dim, in_dim, grid_size, device=device)
+            * noise_scale
+            / (np.sqrt(in_dim) * np.sqrt(grid_size)),
+        )  # [2, out_dim, in_dim, grid_size]
+
         self.scale_base = torch.nn.Parameter(
             (
                 1 / (in_dim**0.5)
@@ -72,12 +62,26 @@ class KANLinearFFT(KANLinear2):
             requires_grad=sb_trainable,
         )
 
+        if bias is True:
+            self.bias = torch.nn.Parameter(
+                torch.rand(out_dim), requires_grad=bias_trainable
+            )
+        else:
+            self.bias = None
+
     def forward(self, x):
         shape = x.shape[:-1]
         x = x.view(-1, self.in_dim)
         # x [batch, in_dim]
 
-        splines = b_splines(x, self.grid, self.k)  # [batch_size, in_dim, grid_size + k]
+        # [batch, in_dim, 2*grid_size]
+
+        splines = x.view(*x.shape, 1).expand(-1, -1, 2 * self.grid_size)
+
+        splines_cos = torch.cos(splines[:, :, : self.grid_size] * self.k)
+        splines_sin = torch.sin(splines[:, :, self.grid_size :] * self.k)
+
+        splines = torch.cat([splines_cos, splines_sin], dim=-1)
 
         ####### Efficient KAN forward #########
 
@@ -88,12 +92,25 @@ class KANLinearFFT(KANLinear2):
         y_spline = F.linear(
             splines.view(batch_size, -1),
             (self.coeff * self.scale_spline.unsqueeze(-1)).view(self.out_dim, -1),
-        )  # [batch_size, in_dim * (grid_size + k)] @ [out_dim, in_dim * (grid_size + k)]^T = [batch, out_dim]
+        )  # [batch_size, in_dim * grid_size * 2] @ [out_dim, in_dim * grid_size * 2]^T = [batch, out_dim]
 
         y = y_b + y_spline
+
+        if self.bias is not None:
+            y = y + self.bias
 
         #######################################################################
 
         y = y.view(*shape, self.out_dim)
 
         return y
+
+    def regularization_loss(self, regularize_activation=1.0, regularize_entropy=1.0):
+        l1_fake = self.coeff.abs().mean(-1)
+        regularization_loss_activation = l1_fake.sum()
+        p = l1_fake / regularization_loss_activation
+        regularization_loss_entropy = -torch.sum(p * p.log())
+        return (
+            regularize_activation * regularization_loss_activation
+            + regularize_entropy * regularization_loss_entropy
+        )
