@@ -1,9 +1,8 @@
 import torch
-import torch.nn.functional as F
 
 from lkan.trainers.base import BaseTrainer
 
-from .basickan import BasicKANTrainer
+from .basic import BasicKANTrainer, BasicMLPTrainer
 
 
 class ImgKANTrainer(BasicKANTrainer):
@@ -17,6 +16,24 @@ class ImgKANTrainer(BasicKANTrainer):
 
         BaseTrainer.training_step(self, batch, batch_idx)
 
+    def step(self, batch, batch_idx):
+        x, y = batch
+
+        x = x.flatten(1)
+
+        y_pred = self.model(x)
+
+        loss = torch.nn.CrossEntropyLoss()(y_pred, y)
+        accuracy = (y_pred.argmax(dim=1) == y).float().mean()
+
+        logs = {
+            "metrics/loss": loss,
+            "metrics/accuracy": accuracy,
+        }
+        return loss, logs
+
+
+class ImgMLPTrainer(BasicMLPTrainer):
     def step(self, batch, batch_idx):
         x, y = batch
 

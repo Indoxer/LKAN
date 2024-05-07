@@ -1,5 +1,7 @@
 script: lkan.scripts.train
 model: lkan.models.MLP
+logger: lkan.loggers.TensorBoardLogger
+logger_params: {}
 model_params:
   layers_dims: [784,128,10]
   device: ${trainer_params.device}

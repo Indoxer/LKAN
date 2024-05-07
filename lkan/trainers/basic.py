@@ -1,7 +1,7 @@
 import torch
 import torch.nn.functional as F
 
-from lkan.loggers import CustomLogger
+from lkan.loggers import BaseLogger
 from lkan.models import KAN
 
 from .base import BaseTrainer
@@ -11,17 +11,17 @@ class BasicKANTrainer(BaseTrainer):
     def __init__(
         self,
         model: KAN,
-        lr: float,
-        update_grid: bool,
-        grid_update_freq: int,
-        stop_grid_update_step: int,
-        logger: CustomLogger,
-        lr_scheduler: torch.optim.lr_scheduler._LRScheduler,
-        lr_scheduler_params: dict,
-        lr_step: str,
-        clip_grad_norm: float,
-        accumulate_grad_batches: int,
-        device: str,
+        lr: float = 0.01,
+        update_grid: bool = False,
+        grid_update_freq: int = 5,
+        stop_grid_update_step: int = 1000,
+        logger: BaseLogger = None,
+        lr_scheduler: torch.optim.lr_scheduler._LRScheduler = None,
+        lr_scheduler_params: dict = None,
+        lr_step: str = None,
+        clip_grad_norm: float = 0.5,
+        accumulate_grad_batches: int = 1,
+        device: str = "cuda",
     ) -> None:
         super().__init__(
             model=model,
@@ -48,6 +48,20 @@ class BasicKANTrainer(BaseTrainer):
 
         super().training_step(batch, batch_idx)
 
+    def step(self, batch, batch_idx):
+        x, y = batch
+
+        y_pred = self.model(x)
+
+        loss = F.mse_loss(y_pred, y)
+
+        logs = {
+            "metrics/loss": loss,
+        }
+        return loss, logs
+
+
+class BasicMLPTrainer(BaseTrainer):
     def step(self, batch, batch_idx):
         x, y = batch
 

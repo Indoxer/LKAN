@@ -35,7 +35,9 @@ Convolution KAN (40050 parameters) - 97,3% accuracy (need hyperparameter tuning 
 
 # Docs
 
-See examples/ (in future)
+See examples/
+
+`continual_training.ipynb` - continual training, comparison mlp, KANLinear2, KanLinearFFT
 
 # Problems
 - [ ] update_grid on cuda raise error (torch.linalg.lstsq assume full rank on cuda, only one algorithm) - solved temporary, moved calculating lstsq to cpu

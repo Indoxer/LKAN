@@ -3,5 +3,7 @@ from .popular import (
     CIFAR10DataModule,
     FashionMNISTDataModule,
     MNISTDataModule,
+    OwnDataModule,
+    OwnDataModule2,
     TestDataModule,
 )

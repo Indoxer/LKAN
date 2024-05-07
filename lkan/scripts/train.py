@@ -1,10 +1,10 @@
 from omegaconf import OmegaConf
 
-from lkan.loggers import CustomLogger
+from lkan.loggers import BaseLogger
 from lkan.utils import custom_import
 
 
-def run(cfg: OmegaConf, logger: CustomLogger):
+def run(cfg: OmegaConf, logger: BaseLogger):
     model = custom_import(cfg.model)(**cfg.model_params)
 
     total_params = sum(p.numel() for p in model.parameters())

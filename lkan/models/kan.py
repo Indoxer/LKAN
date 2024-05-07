@@ -1,31 +1,31 @@
-import enum
+from typing import Callable, List
 
 import torch
 
-from .kan_linear import KANLinear
-from .kan_linear_2 import KANLinear2
-from .kan_linear_fft import KANLinearFFT
+from .layers.kan_linear import KANLinear
+from .layers.kan_linear_2 import KANLinear2
+from .layers.kan_linear_fft import KANLinearFFT
 
 
 class KAN(torch.nn.Module):
     def __init__(
         self,
-        layers_dims=[4, 3, 2],
-        grid_size=5,
-        k=3,
-        noise_scale=0.1,
-        noise_scale_base=0.1,
-        scale_spline=1.0,
-        base_fun=torch.nn.SiLU(),
-        bias=True,
-        grid_eps=1.0,
-        grid_range=[-1, 1],
-        bias_trainable=True,
-        sp_trainable=True,
-        sb_trainable=True,
-        kan_layer_version="normal",
-        device="cpu",
-    ):
+        layers_dims: List[int] = [4, 3, 2],
+        grid_size: int = 5,
+        k: int = 3,
+        noise_scale: float = 0.1,
+        noise_scale_base: float = 0.1,
+        scale_spline: float = 1.0,
+        base_fun: str | Callable = "silu",
+        bias: bool = True,
+        grid_eps: float = 1.0,
+        grid_range: List[float] = [-1.0, 1.0],
+        bias_trainable: bool = True,
+        sp_trainable: bool = True,
+        sb_trainable: bool = True,
+        kan_layer_version: str = "fft",
+        device: str = "cpu",
+    ) -> None:
         super().__init__()
         self.layers = torch.nn.ModuleList()
 
@@ -33,8 +33,10 @@ class KAN(torch.nn.Module):
             if base_fun == "silu":
                 base_fun = torch.nn.SiLU()
 
+        kan_layer_version = str(kan_layer_version)
+
         for in_dim, out_dim in zip(layers_dims, layers_dims[1:]):
-            if kan_layer_version == 2:
+            if kan_layer_version == "2":
                 layer = KANLinear2(
                     in_dim=in_dim,
                     out_dim=out_dim,
@@ -51,7 +53,7 @@ class KAN(torch.nn.Module):
                     sb_trainable=sb_trainable,
                     device=device,
                 )
-            elif kan_layer_version == 1:
+            elif kan_layer_version == "1":
                 layer = KANLinear(
                     in_dim=in_dim,
                     out_dim=out_dim,

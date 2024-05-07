@@ -7,7 +7,10 @@ class BaseDataModule:
         self.batch_size = batch_size
         self.split_ratio = split_ratio
 
-    def split_dataset(self, dataset):
+    def split_dataset(self, dataset, split_ratio=None):
+        if split_ratio is None:
+            split_ratio = self.split_ratio
+
         train_size = int(self.split_ratio * len(dataset))
         val_size = len(dataset) - train_size
         train_dataset, val_dataset = random_split(dataset, [train_size, val_size])
@@ -23,5 +26,5 @@ class BaseDataModule:
 
     def val_dataloader(self):
         return torch.utils.data.DataLoader(
-            self.val, batch_size=self.batch_size, shuffle=True, num_workers=8
+            self.val, batch_size=self.batch_size, shuffle=False, num_workers=8
         )

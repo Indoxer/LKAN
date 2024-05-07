@@ -5,7 +5,7 @@ from lkan.runner import Runner
 
 def main():
     path = Path(__file__).parent
-    config_path = f"{path}/lkan/configs/kan_linear/mnist.yaml"
+    config_path = f"{path}/lkan/configs/mlp/mnist.yaml"
 
     runner = Runner()
     cfg = runner.load_config(config_path)

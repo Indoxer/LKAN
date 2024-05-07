@@ -2,7 +2,6 @@ import os
 
 from omegaconf import OmegaConf
 
-from lkan.loggers import CustomLogger
 from lkan.utils.base import custom_import
 
 
@@ -15,10 +14,11 @@ class Runner:
         return cfg
 
     def run(self, cfg: OmegaConf) -> None:
-        logger = CustomLogger(
-            save_dir=cfg.save_dir, name=cfg.name, version=cfg.version, cfg=cfg
-        )
-        cfg.save_dir = logger.save_dir
+        logger = custom_import(cfg.logger)(**cfg.logger_params, cfg=cfg)
+
+        # Logger can change save_dir
+        if hasattr(logger, "save_dir"):
+            cfg.save_dir = logger.save_dir
 
         script = custom_import(cfg.script)
 
