@@ -27,9 +27,9 @@ KANLinear2 (31M parameters) - 36.5 it/s
 
 MNIST, batch_size=64, epochs=5, lr=0.002
 
-MLP (42154 parameters) 98,85% accuracy (130 it/s - memory bootleneck on MNIST, so real performance is better)
+Normal CNN (42154 parameters) 98,85% accuracy (130 it/s - memory bootleneck on MNIST, so real performance is better)
 
-KAN (43392 parameters) - 98,24% accuracy (19 it/s - need optimization)
+Convolution KAN (43392 parameters) - 98,24% accuracy (19 it/s - need optimization)
 
 # Docs
 
@@ -57,6 +57,8 @@ See examples/ (in future)
 - [ ] KAN as CNN filter?
 - [ ] KAN in VIT?
 - [ ] Fourier KAN?
+- [ ] GraphKAN
+- [ ] Mixing KAN and normal Layers.
 - [ ] pruning
 - [ ] test continual learning
 - [ ] docs and examples - write notebooks like in KAN repo.

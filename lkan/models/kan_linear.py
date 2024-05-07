@@ -121,6 +121,7 @@ class KANLinear(torch.nn.Module):
         # [batch_size, in_dim, grid_size + k]
         splines = b_splines(x, self.grid, self.k)
 
+        # TODO: Is this correct?
         orig_coeff = self.coeff * self.scale_spline.unsqueeze(-1)
 
         # [in_dim, batch_size, grid_size + k] @ [in_dim, grid_size + k, out_dim] = [in_dim, batch_size, out_dim] -> [batch_size, in_dim, out_dim]

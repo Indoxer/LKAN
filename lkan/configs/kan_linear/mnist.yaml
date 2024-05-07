@@ -39,5 +39,5 @@ datamodule_params:
   root: ./.data
   input_size: 28
 save_dir: ./.experiments/${name}/${version}
-name: mnistkan
+name: mnist_kan_linear
 version: v1

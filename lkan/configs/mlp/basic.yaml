@@ -22,5 +22,5 @@ datamodule_params:
   batch_size: 16
   split_ratio: 0.8
 save_dir: ./.experiments/${name}/${version}
-name: basicmlp
+name: basic_mlp
 version: v1

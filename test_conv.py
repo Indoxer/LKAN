@@ -88,14 +88,6 @@ print(f"Number of parameters: {counter}")
 
 opt = torch.optim.Adam(model.parameters(), lr=lr)
 
-# prof = torch.profiler.profile(
-#     schedule=torch.profiler.schedule(wait=1, warmup=1, active=3, repeat=1),
-#     on_trace_ready=torch.profiler.tensorboard_trace_handler(save_dir),
-#     record_shapes=True,
-#     profile_memory=True,
-#     with_stack=True,
-# )
-# prof.start()
 
 for epoch in range(epochs):
     train_acc = 0
@@ -110,7 +102,6 @@ for epoch in range(epochs):
 
         loss.backward()
         opt.step()
-        # prof.step()
 
         train_acc += (y_pred.argmax(1) == y).float().mean().item()
         avg_train_loss += loss.item()
@@ -132,5 +123,3 @@ for epoch in range(epochs):
         print(
             f"Epoch {epoch+1}/{epochs} - Train Loss: {avg_train_loss} - Val Loss: {avg_loss} - Train Acc: {train_acc} -Val Acc: {acc}"
         )
-
-# prof.stop()

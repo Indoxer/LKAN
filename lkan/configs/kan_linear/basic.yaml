@@ -37,5 +37,5 @@ datamodule_params:
   batch_size: 64
   split_ratio: 0.8
 save_dir: ./.experiments/${name}/${version}
-name: basickan
+name: basic_kan_linear
 version: v1
