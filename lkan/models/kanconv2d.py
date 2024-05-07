@@ -26,9 +26,12 @@ class KANConv2d(torch.nn.Module):
         self.padding = padding
         self.dilation = dilation
 
-        self.kernel = KANLinear2(
-            in_channels * kernel_size * kernel_size, out_channels, device=device
-        )
+        self.kernels = torch.nn.ModuleList()
+        for _ in range(in_channels):
+            self.kernels.append(
+                KANLinear2(kernel_size * kernel_size, out_channels, device=device)
+            )
+
         if bias:
             self.bias = torch.nn.Parameter(
                 torch.zeros(out_channels), requires_grad=True
@@ -44,9 +47,20 @@ class KANConv2d(torch.nn.Module):
         shape = x.shape
         x = x.view(-1, shape[-3], shape[-2], shape[-1])
 
-        x = self.unfold(x).permute(0, 2, 1).contiguous()
+        x = (
+            self.unfold(x)
+            .permute(0, 2, 1)
+            .view(x.shape[0], -1, self.in_channels, self.kernel_size**2)
+        )
 
-        x = self.kernel(x)
+        x = torch.stack(
+            [
+                kernel(x[:, :, i, :].contiguous())
+                for i, kernel in enumerate(self.kernels)
+            ],
+            dim=2,
+        ).sum(dim=2)
+
         if self.bias is not False:
             x = x + self.bias[None, None, :]
 
