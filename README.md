@@ -56,9 +56,9 @@ See examples/ (in future)
 - [x] MNIST
 - [ ] CIFAR10
 - [ ] KAN ResNet?
-- [ ] KAN as CNN filter?
+- [x] KAN as CNN filter?
 - [ ] KAN in VIT?
-- [ ] Fourier KAN?
+- [x] Fourier KAN?
 - [ ] GraphKAN
 - [ ] Mixing KAN and normal Layers.
 - [ ] pruning
