@@ -68,14 +68,15 @@ def curve2coeff(x, y, grid, k, eps=1e-8):
 # fftkan2 = cudakan.fftkan
 
 
-def fftkan(X, W, S, C, G, I, O):
-    """Notation used in the code: (I have equasion that match this notation (easiest to write code in cuda))
+def fftkan(X, W, S, C, B, G, I, O):
+    """Notation used in the code: (I have equations that match this notation (easiest to write code in cuda))
 
     Args:
         X (torch.Tensor): input tensor of shape [batch, in_dim]
-        W (torch.Tensor): silu(x) weights of shape [in_dim, out_dim]
-        S (torch.Tensor): spline scale of shape [in_dim, out_dim]
-        C (torch.Tensor): spline coefficients of shape [in_dim, 2, out_dim, grid_size]
+        W (torch.Tensor): silu(x) weights of shape [out_dim, in_dim]
+        S (torch.Tensor): spline scale of shape [out_dim, in_dim]
+        C (torch.Tensor): spline coefficients of shape [2, out_dim, grid_size]
+        B (int): batch size
         G (int): grid size
         I (int): in_dim
         O (int): out_dim
