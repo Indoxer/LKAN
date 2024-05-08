@@ -8,3 +8,4 @@ dist/
 LKAN.egg-info/
 .experiments/
 .logs/
+.vscode/

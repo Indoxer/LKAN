@@ -3,9 +3,25 @@ Implementations of KAN variations.
 
 # Installation
 
+# !!! CUDA version is not ready, just install with ``pip install .``
+
+### WAY 1 (I don't tested):
+installed python 3.10 + nvcc
+
 ```
 pip install .
 ```
+
+### The best way:
+Install conda https://conda.io/projects/conda/en/latest/user-guide/install/index.html
+
+```
+conda create -n lkan python==3.10
+conda activate lkan
+conda install cuda-nvcc
+pip install .
+```
+
 
 To run mnist select config in `main.py` and run `main.py`.
 

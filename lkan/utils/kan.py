@@ -1,5 +1,6 @@
 import torch
 import torch.nn.functional as F
+from torch.utils.cpp_extension import load
 
 
 def b_splines(x, grid, k):
@@ -61,6 +62,10 @@ def curve2coeff(x, y, grid, k, eps=1e-8):
 
 
 # placeholder for cuda version
+
+# cudakan = load(name="cudakan", sources=["./extension/kan.cpp"])
+
+# fftkan2 = cudakan.fftkan
 
 
 def fftkan(X, W, S, C, G, I, O):
