@@ -33,7 +33,7 @@ class KANConv2d(torch.nn.Module):
 
         if bias:
             self.bias = torch.nn.Parameter(
-                torch.zeros(out_channels), requires_grad=True, device=device
+                torch.zeros(out_channels, device=device), requires_grad=True
             )
         else:
             self.bias = bias
