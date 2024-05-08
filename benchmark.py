@@ -32,7 +32,14 @@ print(
         sort_by="self_cuda_time_total", row_limit=10
     )
 )
+prof = torch.profiler.profile(
+    on_trace_ready=torch.profiler.tensorboard_trace_handler(".logs/kanconv"),
+    record_shapes=True,
+    profile_memory=True,
+    with_stack=True,
+)
 
+prof.start()
 for _ in range(20):
     x = torch.ones(100, 3, 50, 50, device="cuda")
     prof.step()

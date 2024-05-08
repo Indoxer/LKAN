@@ -5,7 +5,7 @@ import torchvision
 from sympy import Max
 from tqdm import tqdm
 
-from lkan.models import KANConv2d, KANLinearFFT
+from lkan.models import KANConv2d, KANLinear, KANLinearFFT
 
 if torch.cuda.is_available():
     device = torch.device("cuda")
@@ -39,10 +39,14 @@ class KAN(nn.Module):
         super().__init__()
         self.layers = nn.Sequential(
             KANConv2d(
-                in_channels=1, out_channels=4, kernel_size=5, stride=1, padding=2
+                in_channels=1,
+                out_channels=16,
+                kernel_size=5,
+                stride=1,
+                padding=2,
             ),
             nn.MaxPool2d(2),
-            KANConv2d(4, 6, 5, 1, 2),
+            KANConv2d(16, 6, 5, 1, 2),
             nn.MaxPool2d(2),
             nn.Flatten(),
             KANLinearFFT(6 * 7 * 7, 10),
@@ -88,6 +92,14 @@ print(f"Number of parameters: {counter}")
 
 opt = torch.optim.Adam(model.parameters(), lr=lr)
 
+# prof = torch.profiler.profile(
+#     on_trace_ready=torch.profiler.tensorboard_trace_handler(".logs/conv"),
+#     record_shapes=True,
+#     profile_memory=True,
+#     with_stack=True,
+# )
+
+# prof.start()
 
 for epoch in range(epochs):
     train_acc = 0
@@ -102,6 +114,7 @@ for epoch in range(epochs):
 
         loss.backward()
         opt.step()
+        # prof.step()
 
         train_acc += (y_pred.argmax(1) == y).float().mean().item()
         avg_train_loss += loss.item()
@@ -118,8 +131,11 @@ for epoch in range(epochs):
             loss = nn.CrossEntropyLoss()(y_pred, y)
             acc += (y_pred.argmax(1) == y).float().mean().item()
             avg_loss += loss.item()
+            # prof.step()
         acc /= len(loader_val)
         avg_loss /= len(loader_val)
         print(
             f"Epoch {epoch+1}/{epochs} - Train Loss: {avg_train_loss} - Val Loss: {avg_loss} - Train Acc: {train_acc} -Val Acc: {acc}"
         )
+
+# prof.stop()

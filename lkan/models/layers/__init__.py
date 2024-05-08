@@ -1,4 +1,3 @@
-from .fast_kan_conv2d import FastKANConv2d
 from .kan_linear import KANLinear
 from .kan_linear_0 import KANLinear0
 from .kan_linear_fft import KANLinearFFT
