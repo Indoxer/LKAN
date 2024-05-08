@@ -11,7 +11,7 @@ class KANLinearFFT(torch.nn.Module):
         grid_size=5,
         noise_scale=0.1,
         noise_scale_base=0.1,
-        scale_spline=None,
+        scale_spline=1.0,
         base_fun=torch.nn.SiLU(),
         bias=False,
         bias_trainable=True,

@@ -2,6 +2,7 @@ import math
 
 import torch
 
+from .kan_linear import KANLinear
 from .kan_linear_fft import KANLinearFFT
 
 
@@ -28,7 +29,9 @@ class KANConv2d(torch.nn.Module):
         self.kernels = torch.nn.ModuleList()
         for _ in range(in_channels):
             self.kernels.append(
-                KANLinearFFT(kernel_size * kernel_size, out_channels, device=device)
+                KANLinearFFT(
+                    kernel_size * kernel_size, out_channels, bias=False, device=device
+                )
             )
 
         if bias:
@@ -50,7 +53,7 @@ class KANConv2d(torch.nn.Module):
             self.unfold(x)
             .permute(0, 2, 1)
             .view(x.shape[0], -1, self.in_channels, self.kernel_size**2)
-        )
+        ).contiguous()
 
         x = torch.stack(
             [

@@ -7,3 +7,4 @@ Large_Kolmogorov_Arnold_Networks.egg-info
 dist/
 LKAN.egg-info/
 .experiments/
+.logs/
