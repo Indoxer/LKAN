@@ -40,13 +40,13 @@ class KAN(nn.Module):
         self.layers = nn.Sequential(
             KANConv2d(
                 in_channels=1,
-                out_channels=16,
+                out_channels=5,
                 kernel_size=5,
                 stride=1,
                 padding=2,
             ),
             nn.MaxPool2d(2),
-            KANConv2d(16, 6, 5, 1, 2),
+            KANConv2d(5, 6, 5, 1, 2),
             nn.MaxPool2d(2),
             nn.Flatten(),
             KANLinearFFT(6 * 7 * 7, 10),
@@ -90,10 +90,10 @@ for param in model.parameters():
 
 print(f"Number of parameters: {counter}")
 
-opt = torch.optim.Adam(model.parameters(), lr=lr)
+opt = torch.optim.AdamW(model.parameters(), lr=lr)
 
 # prof = torch.profiler.profile(
-#     on_trace_ready=torch.profiler.tensorboard_trace_handler(".logs/conv"),
+#     on_trace_ready=torch.profiler.tensorboard_trace_handler(".logs/kanconv"),
 #     record_shapes=True,
 #     profile_memory=True,
 #     with_stack=True,
@@ -139,3 +139,14 @@ for epoch in range(epochs):
         )
 
 # prof.stop()
+
+# print(
+#     prof.key_averages(group_by_stack_n=5).table(
+#         sort_by="self_cpu_time_total", row_limit=8
+#     )
+# )
+# print(
+#     prof.key_averages(group_by_stack_n=5).table(
+#         sort_by="self_cuda_time_total", row_limit=8
+#     )
+# )

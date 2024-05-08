@@ -4,6 +4,8 @@ import numpy as np
 import torch
 from torch.nn import functional as F
 
+from lkan.utils.kan import fftkan
+
 from .kan_linear import KANLinear
 from .kan_linear_fft import KANLinearFFT
 
@@ -42,11 +44,6 @@ class KANConv2d(torch.nn.Module):
         self.chunk_size = chunk_size
 
         ##
-
-        k = torch.arange(1, self.grid_size + 1, device=device).view(
-            1, 1, self.grid_size
-        )
-        self.register_buffer("k", k)
 
         if scale_spline is not None:
             self.scale_spline = torch.nn.Parameter(
@@ -117,30 +114,16 @@ class KANConv2d(torch.nn.Module):
     ):
         shape = x.shape[:-1]
         x = x.view(-1, self.kernel_size**2)
-        # x [batch, in_channels]
 
-        # [batch, in_dim, 2*grid_size]
-        splines = x.view(*x.shape, 1).expand(-1, -1, 2 * self.grid_size)
-
-        splines_cos = torch.cos(splines[:, :, : self.grid_size] * self.k)
-        splines_sin = torch.sin(splines[:, :, self.grid_size :] * self.k)
-
-        splines = torch.cat([splines_cos, splines_sin], dim=-1)
-
-        ####### Efficient KAN forward #########
-
-        batch_size = x.shape[0]
-        y_b = F.linear(self.base_fun(x), scale_base)
-        # [batch_size, in_dim] @ [out_dim, in_dim]^T = [batch_size, out_dim]
-
-        y_spline = F.linear(
-            splines.view(batch_size, -1),
-            (coeff * scale_spline.unsqueeze(-1)).view(self.out_channels, -1),
-        )  # [batch_size, in_dim * grid_size * 2] @ [out_dim, in_dim * grid_size * 2]^T = [batch, out_dim]
-
-        y = y_b + y_spline
-
-        #######################################################################
+        y = fftkan(
+            x,
+            scale_base,
+            scale_spline,
+            coeff,
+            self.grid_size,
+            self.in_channels,
+            self.out_channels,
+        )
 
         y = y.view(*shape, self.out_channels)
 
