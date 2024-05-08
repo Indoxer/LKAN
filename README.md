@@ -3,7 +3,7 @@ Implementations of KAN variations.
 
 # Installation
 
-# !!! CUDA version is not ready, just install with ``pip install .``
+### !!! CUDA version is not ready, just install with ``pip install .``
 
 ### WAY 1 (I don't tested):
 installed python 3.10 + nvcc
