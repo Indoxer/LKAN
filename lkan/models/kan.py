@@ -2,9 +2,7 @@ from typing import Callable, List
 
 import torch
 
-from .layers.kan_linear import KANLinear
-from .layers.kan_linear_2 import KANLinear2
-from .layers.kan_linear_fft import KANLinearFFT
+from .layers import KANLinear, KANLinear0, KANLinearFFT
 
 
 class KAN(torch.nn.Module):
@@ -36,8 +34,8 @@ class KAN(torch.nn.Module):
         kan_layer_version = str(kan_layer_version)
 
         for in_dim, out_dim in zip(layers_dims, layers_dims[1:]):
-            if kan_layer_version == "2":
-                layer = KANLinear2(
+            if kan_layer_version == "1":
+                layer = KANLinear(
                     in_dim=in_dim,
                     out_dim=out_dim,
                     grid_size=grid_size,
@@ -53,8 +51,8 @@ class KAN(torch.nn.Module):
                     sb_trainable=sb_trainable,
                     device=device,
                 )
-            elif kan_layer_version == "1":
-                layer = KANLinear(
+            elif kan_layer_version == "0":
+                layer = KANLinear0(
                     in_dim=in_dim,
                     out_dim=out_dim,
                     grid_size=grid_size,

@@ -15,7 +15,7 @@ model_params:
   bias_trainable: true
   sp_trainable: true
   sb_trainable: true
-  kan_layer_version: 2
+  kan_layer_version: fft
   device: ${trainer_params.device}
 trainer: lkan.trainers.ImgKANTrainer
 trainer_params:

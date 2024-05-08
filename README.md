@@ -17,9 +17,9 @@ To view charts, run `tensorboard --logdir .experiments/`
 
 MLP (31.8M parameters) - 51 it/s 
 
-KANLinear (32.3 M parameters) - 4.3 it/s
+KANLinear0 (32.3 M parameters) - 4.3 it/s
 
-KANLinear2 (31M parameters) - 36.5 it/s 
+KANLinear (31M parameters) - 36.5 it/s 
 
 KANLinearFFT (33M parameters) - 40 it/s
 
@@ -37,7 +37,7 @@ Convolution KAN (40050 parameters) - 97,3% accuracy (need hyperparameter tuning 
 
 See examples/
 
-`continual_training.ipynb` - continual training, comparison of mlp, KANLinear2 and KanLinearFFT
+`continual_training.ipynb` - continual training, comparison of mlp, KANLinear and KanLinearFFT
 
 # Problems
 - [ ] update_grid on cuda raise error (torch.linalg.lstsq assume full rank on cuda, only one algorithm) - solved temporary, moved calculating lstsq to cpu
@@ -83,6 +83,6 @@ See examples/
 ```
 [Original KAN repo](https://github.com/KindXiaoming/pykan) - base idea
 
-[efficient-kan](https://github.com/Blealtan/efficient-kan) - KANLinear2 and optimizations
+[efficient-kan](https://github.com/Blealtan/efficient-kan) - KANLinear and optimizations
 
 

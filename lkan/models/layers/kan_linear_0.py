@@ -5,7 +5,7 @@ import torch.nn.functional as F
 from lkan.utils.kan import b_splines, curve2coeff
 
 
-class KANLinear(torch.nn.Module):
+class KANLinear0(torch.nn.Module):
     def __init__(
         self,
         in_dim,
@@ -14,17 +14,17 @@ class KANLinear(torch.nn.Module):
         k=3,
         noise_scale=0.1,
         noise_scale_base=0.1,
-        scale_spline=None,
+        scale_spline=1.0,
         base_fun=torch.nn.SiLU(),
+        bias=True,
         grid_eps=0.02,
         grid_range=[-1, +1],
-        bias=False,
         bias_trainable=True,
         sp_trainable=True,
         sb_trainable=True,
         device="cpu",
     ):
-        torch.nn.Module.__init__(self)
+        super().__init__()
         self.in_dim = in_dim
         self.out_dim = out_dim
         self.k = k
@@ -40,25 +40,10 @@ class KANLinear(torch.nn.Module):
         ).repeat(self.in_dim, 1)
         self.register_buffer("grid", grid)  # grid [in_dim, grid_size + 2*k + 1]
 
-        if scale_spline is not None:
-            self.scale_spline = torch.nn.Parameter(
-                torch.full(
-                    (
-                        out_dim,
-                        in_dim,
-                    ),
-                    fill_value=scale_spline,
-                    device=device,
-                ),
-                requires_grad=sp_trainable,
-            )
-        else:
-            self.register_buffer("scale_spline", torch.tensor([1.0], device=device))
-
         noise = (
             (torch.rand(grid_size + 1, in_dim, out_dim, device=device) - 1 / 2)
             * noise_scale
-            / self.grid_size  # TODO: (np.sqrt(in_dim) * np.sqrt(grid_size)) ?
+            / self.grid_size
         )
         self.coeff = torch.nn.Parameter(
             curve2coeff(
@@ -77,10 +62,21 @@ class KANLinear(torch.nn.Module):
             ),
             requires_grad=sb_trainable,
         )
+        self.scale_spline = torch.nn.Parameter(
+            torch.full(
+                (
+                    out_dim,
+                    in_dim,
+                ),
+                fill_value=scale_spline,
+                device=device,
+            ),
+            requires_grad=sp_trainable,
+        )  # [1, size]
 
-        if bias is True:
+        if bias:
             self.bias = torch.nn.Parameter(
-                torch.rand(out_dim), requires_grad=bias_trainable
+                torch.zeros(1, out_dim, device=device), requires_grad=bias_trainable
             )
         else:
             self.bias = None
@@ -92,37 +88,34 @@ class KANLinear(torch.nn.Module):
 
         splines = b_splines(x, self.grid, self.k)  # [batch_size, in_dim, grid_size + k]
 
-        ####### Efficient KAN forward #########
+        ############## "Original" KAN forward #################
 
-        batch_size = x.shape[0]
-        y_b = F.linear(self.base_fun(x), self.scale_base)
-        # [batch_size, in_dim] @ [out_dim, in_dim]^T = [batch_size, out_dim]
+        # [out_dim, in_dim]*[batch_size, 1, in_dim] = [batch_size, out_dim, in_dim]
+        y_b = self.scale_base * self.base_fun(x).unsqueeze(1)
 
-        y_spline = F.linear(
-            splines.view(batch_size, -1),
-            (self.coeff * self.scale_spline.unsqueeze(-1)).view(self.out_dim, -1),
-        )  # [batch_size, in_dim * (grid_size + k)] @ [out_dim, in_dim * (grid_size + k)]^T = [batch, out_dim]
+        # Multiplying splines with coefficients and summing over (grid_size + k) - the same as spline(x) in paper.
+        # [in_dim, batch_size, grid_size + k] @ [in_dim, grid_size + k, out_dim] = [in_dim, batch_size, out_dim] -> [batch_size, out_dim, in_dim]
+        y_spline = (splines.permute(1, 0, 2) @ self.coeff.permute(1, 2, 0)).permute(
+            1, 2, 0
+        )
 
+        # [batch_size, out_dim, in_dim] * [out_dim, in_dim]
+        y_spline = self.scale_spline * y_spline
+
+        # [batch_size, out_dim, in_dim] * [batch_size, out_dim, in_dim]
         y = y_b + y_spline
+
+        # [batch_size, out_dim] + [1, out_dim]
+        y = torch.sum(y, dim=2)
 
         if self.bias is not None:
             y = y + self.bias
 
-        #######################################################################
-
         y = y.view(*shape, self.out_dim)
 
-        return y
+        ######################################################
 
-    def regularization_loss(self, regularize_activation=1.0, regularize_entropy=1.0):
-        l1_fake = self.coeff.abs().mean(-1)
-        regularization_loss_activation = l1_fake.sum()
-        p = l1_fake / regularization_loss_activation
-        regularization_loss_entropy = -torch.sum(p * p.log())
-        return (
-            regularize_activation * regularization_loss_activation
-            + regularize_entropy * regularization_loss_entropy
-        )
+        return y
 
     @torch.no_grad()
     def update_grid(self, x, margin=0.01):
