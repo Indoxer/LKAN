@@ -22,26 +22,27 @@ class FFTKAN(torch.autograd.Function):
         return cudakan.b_sigmoid(grad_output)
 
 
-B = 1
-G = 1
-I = 1
-O = 2
+B = 10
+G = 10
+I = 10
+O = 10
 
 #   // X [B, I]
 #   // W [O, I]
 #   // S [O, I]
-#   // C [2, O, I, G]
+#   // C [O, I, G, 2]
 #   // -> Y [B, O]
 
-# X = torch.tensor([[0.5]], device="cuda")
-# W = torch.tensor([[1.0], [1.0]], device="cuda")
-# S = torch.tensor([[0.0], [0.0]], device="cuda")
-# C = torch.tensor([[[[0.0]], [[0.0]]], [[[0.0]], [[0.0]]]], device="cuda")
+# X = torch.tensor([[np.pi]], device="cuda")
+# W = torch.tensor([[0.0], [0.0]], device="cuda")
+# S = torch.tensor([[0.0], [1.0]], device="cuda")
+# # [cos, sin]
+# C = torch.tensor([[[[0.0]], [[1.0]]], [[[0.0]], [[1.0]]]], device="cuda")
 
 X = torch.randn(B, I, device="cuda")
-W = torch.randn(O, I, device="cuda") * 0.0
+W = torch.randn(O, I, device="cuda")
 S = torch.randn(O, I, device="cuda")
-C = torch.randn(2, O, I, G, device="cuda")
+C = torch.randn(O, I, 2, G, device="cuda")
 
 print(X, W, S, C)
 
@@ -52,4 +53,4 @@ y2 = fftkan(X, W, S, C, B, I, O, G)
 
 print("out: ", y, y2)
 
-print(torch.abs(y - y2).mean().item())
+print(torch.abs(y - y2).max().item())

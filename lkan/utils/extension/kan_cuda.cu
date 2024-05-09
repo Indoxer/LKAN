@@ -14,7 +14,7 @@ __global__ void fftkan_cuda_forward_kernel(
   // X [B, I]
   // W [O, I]
   // S [O, I]
-  // C [2, O, I, G]
+  // C [O, I, 2, G]
   // -> Y [B, O]
   int b = blockIdx.x * blockDim.x + threadIdx.x;
   int o = blockIdx.y * blockDim.y + threadIdx.y;
@@ -27,10 +27,10 @@ __global__ void fftkan_cuda_forward_kernel(
             scalar_t g_sum = 0.0f;
             for (int g = 0; g < G; g++)
             {   
-                // scalar_t v_sin, v_cos;
-                // sincos((g+1) * X[b][i], &v_sin, &v_cos);
-                g_sum += C[0][o][i][g]*cos((g+1) * X[b][i]);
-                g_sum += C[1][o][i][g]*sin((g+1) * X[b][i]);
+                scalar_t v_sin, v_cos;
+                sincos((g+1) * X[b][i], &v_sin, &v_cos);
+                g_sum += C[o][i][0][g]*v_cos;
+                g_sum += C[o][i][1][g]*v_sin;
             }
             sum += S[o][i]*g_sum;
             sum += W[o][i] * X[b][i] / (1.0f + expf(-X[b][i]));

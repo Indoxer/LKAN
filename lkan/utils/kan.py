@@ -75,7 +75,7 @@ def fftkan(X, W, S, C, B, I, O, G):
         X (torch.Tensor): input tensor of shape [batch, in_dim]
         W (torch.Tensor): silu(x) weights of shape [out_dim, in_dim]
         S (torch.Tensor): spline scale of shape [out_dim, in_dim]
-        C (torch.Tensor): spline coefficients of shape [2, out_dim, grid_size]
+        C (torch.Tensor): spline coefficients of shape [out_dim, in_dim, 2, grid_size]
         B (int): batch size
         G (int): grid size
         I (int): in_dim
@@ -104,7 +104,7 @@ def fftkan(X, W, S, C, B, I, O, G):
 
     y_spline = F.linear(
         splines.view(batch_size, -1),
-        (C * S.unsqueeze(-1)).view(O, -1),
+        (C * S.unsqueeze(-1).unsqueeze(-1)).view(O, -1),
     )  # [batch_size, in_dim * grid_size * 2] @ [out_dim, in_dim * grid_size * 2]^T = [batch, out_dim]
 
     y = y_b + y_spline

@@ -48,10 +48,10 @@ class KANLinearFFT(torch.nn.Module):
             self.register_buffer("scale_spline", torch.tensor([1.0], device=device))
 
         self.coeff = torch.nn.Parameter(
-            torch.rand(2, out_dim, in_dim, grid_size, device=device)
+            torch.rand(out_dim, in_dim, 2, grid_size, device=device)
             * noise_scale
             / (np.sqrt(in_dim) * np.sqrt(grid_size)),
-        )  # [2, out_dim, in_dim, grid_size]
+        )  # [out_dim, in_dim,2, grid_size]
 
         self.scale_base = torch.nn.Parameter(
             (
@@ -91,7 +91,9 @@ class KANLinearFFT(torch.nn.Module):
 
         y_spline = F.linear(
             splines.view(batch_size, -1),
-            (self.coeff * self.scale_spline.unsqueeze(-1)).view(self.out_dim, -1),
+            (self.coeff * self.scale_spline.unsqueeze(-1).unsqueeze(-1)).view(
+                self.out_dim, -1
+            ),
         )  # [batch_size, in_dim * grid_size * 2] @ [out_dim, in_dim * grid_size * 2]^T = [batch, out_dim]
 
         y = y_b + y_spline

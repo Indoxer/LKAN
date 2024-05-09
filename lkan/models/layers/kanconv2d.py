@@ -64,9 +64,9 @@ class KANConv2d(torch.nn.Module):
         self.coeff = torch.nn.Parameter(
             torch.rand(
                 self.in_channels,
-                2,
                 out_channels,
                 kernel_size**2,
+                2,
                 grid_size,
                 device=device,
             )
