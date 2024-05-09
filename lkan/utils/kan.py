@@ -63,42 +63,49 @@ def curve2coeff(x, y, grid, k, eps=1e-8):
     return value
 
 
-path = os.path.dirname(__file__)
-
-sources = [
-    os.path.join(path, "src", f)
-    for f in os.listdir(os.path.join(path, "src"))
-    if f.endswith(".cpp") or f.endswith(".cu")
-]
-
-cudakan = load(
-    name="cudakan",
-    sources=sources,
-)
+global fftkan_cuda_s
+fftkan_cuda_s = None
 
 
-class FFTKANCUDA(torch.autograd.Function):
-    @staticmethod
-    def forward(X, W, S, C, B, I, O, G):
-        return cudakan.fftkan_forward(X, W, S, C, B, I, O, G)
+def fftkan_cuda(*args):
+    global fftkan_cuda_s
+    if fftkan_cuda_s is None:
+        path = os.path.dirname(__file__)
 
-    @staticmethod
-    def setup_context(ctx, inputs, output):
-        X, W, S, C, B, I, O, G = inputs
-        ctx.vars = (B, I, O, G)
-        ctx.save_for_backward(X, W, S, C)
+        sources = [
+            os.path.join(path, "src", f)
+            for f in os.listdir(os.path.join(path, "src"))
+            if f.endswith(".cpp") or f.endswith(".cu")
+        ]
 
-    @staticmethod
-    @torch.autograd.function.once_differentiable
-    def backward(ctx, dY):
-        X, W, S, C = ctx.saved_tensors
-        B, I, O, G = ctx.vars
-        dX, dW, dS, dC = cudakan.fftkan_backward(dY, X, W, S, C, B, I, O, G)
+        cudakan = load(
+            name="cudakan",
+            sources=sources,
+        )
 
-        return dX, dW, dS, dC, None, None, None, None
+        class FFTKANCUDA(torch.autograd.Function):
+            @staticmethod
+            def forward(X, W, S, C, B, I, O, G):
+                return cudakan.fftkan_forward(X, W, S, C, B, I, O, G)
 
+            @staticmethod
+            def setup_context(ctx, inputs, output):
+                X, W, S, C, B, I, O, G = inputs
+                ctx.vars = (B, I, O, G)
+                ctx.save_for_backward(X, W, S, C)
 
-fftkan_cuda = FFTKANCUDA.apply
+            @staticmethod
+            @torch.autograd.function.once_differentiable
+            def backward(ctx, dY):
+                X, W, S, C = ctx.saved_tensors
+                B, I, O, G = ctx.vars
+                dX, dW, dS, dC = cudakan.fftkan_backward(dY, X, W, S, C, B, I, O, G)
+
+                return dX, dW, dS, dC, None, None, None, None
+
+        fftkan_cuda_s = FFTKANCUDA.apply
+
+    return fftkan_cuda_s(*args)
 
 
 def fftkan(X, W, S, C, B, I, O, G):
