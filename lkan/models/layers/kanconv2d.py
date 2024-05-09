@@ -120,9 +120,10 @@ class KANConv2d(torch.nn.Module):
             scale_base,
             scale_spline,
             coeff,
-            self.grid_size,
-            self.in_channels,
+            x.shape[0],
+            self.kernel_size**2,
             self.out_channels,
+            self.grid_size,
         )
 
         y = y.view(*shape, self.out_channels)
