@@ -19,7 +19,7 @@ prof.start()
 for _ in range(20):
     x = torch.ones(100, 3, 50, 50, device="cuda")
     prof.step()
-    y = l2(x)
+    y = l2(x).mean()
 prof.stop()
 
 print(

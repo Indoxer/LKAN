@@ -63,7 +63,7 @@ batch_size = 64
 split_ratio = 0.8
 
 lr = 0.0003
-epochs = 5
+epochs = 1
 
 transform = torchvision.transforms.Compose(
     [

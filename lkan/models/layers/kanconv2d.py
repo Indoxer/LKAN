@@ -142,6 +142,19 @@ class KANConv2d(torch.nn.Module):
             )  # [batch, patches, in_channels, kernel_size**2]
         ).contiguous()
 
+        # x = torch.stack(
+        #     [
+        #         self.convolve(
+        #             x[:, :, i, :].contiguous(),
+        #             self.scale_base[i],
+        #             self.scale_spline[i],
+        #             self.coeff[i],
+        #         )
+        #         for i in range(self.in_channels)
+        #     ],
+        #     dim=2,
+        # )
+        # x = x.sum(dim=2)
         x = torch.vmap(self.convolve, (2, 0, 0, 0), 2, chunk_size=self.chunk_size)(
             x,
             self.scale_base,

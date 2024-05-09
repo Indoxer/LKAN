@@ -1,3 +1,5 @@
+import os
+
 import torch
 import torch.nn.functional as F
 from torch.utils.cpp_extension import load
@@ -61,11 +63,42 @@ def curve2coeff(x, y, grid, k, eps=1e-8):
     return value
 
 
-# placeholder for cuda version
+path = os.path.dirname(__file__)
 
-# cudakan = load(name="cudakan", sources=["./extension/kan.cpp"])
+sources = [
+    os.path.join(path, "src", f)
+    for f in os.listdir(os.path.join(path, "src"))
+    if f.endswith(".cpp") or f.endswith(".cu")
+]
 
-# fftkan2 = cudakan.fftkan
+cudakan = load(
+    name="cudakan",
+    sources=sources,
+)
+
+
+class FFTKANCUDA(torch.autograd.Function):
+    @staticmethod
+    def forward(X, W, S, C, B, I, O, G):
+        return cudakan.fftkan_forward(X, W, S, C, B, I, O, G)
+
+    @staticmethod
+    def setup_context(ctx, inputs, output):
+        X, W, S, C, B, I, O, G = inputs
+        ctx.vars = (B, I, O, G)
+        ctx.save_for_backward(X, W, S, C)
+
+    @staticmethod
+    @torch.autograd.function.once_differentiable
+    def backward(ctx, dY):
+        X, W, S, C = ctx.saved_tensors
+        B, I, O, G = ctx.vars
+        dX, dW, dS, dC = cudakan.fftkan_backward(dY, X, W, S, C, B, I, O, G)
+
+        return dX, dW, dS, dC, None, None, None, None
+
+
+fftkan_cuda = FFTKANCUDA.apply
 
 
 def fftkan(X, W, S, C, B, I, O, G):

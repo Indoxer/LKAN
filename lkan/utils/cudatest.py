@@ -1,55 +1,78 @@
+import os
+
 import numpy as np
 import torch
 from torch.utils.cpp_extension import load
 
-from kan import fftkan
+from kan import fftkan2
+
+path = os.path.dirname(__file__)
+
+sources = [
+    os.path.join(path, "src", f)
+    for f in os.listdir(os.path.join(path, "src"))
+    if f.endswith(".cpp") or f.endswith(".cu")
+]
 
 cudakan = load(
     name="cudakan",
-    sources=["./extension/kan.cpp", "./extension/kan_cuda.cu"],
+    sources=sources,
     verbose=True,
 )
 
 
 class FFTKAN(torch.autograd.Function):
     @staticmethod
-    def forward(ctx, X, W, S, C, B, I, O, G):
+    def forward(X, W, S, C, B, I, O, G):
         return cudakan.fftkan_forward(X, W, S, C, B, I, O, G)
 
     @staticmethod
+    def setup_context(ctx, inputs, output):
+        X, W, S, C, B, I, O, G = inputs
+        ctx.vars = (B, I, O, G)
+        ctx.save_for_backward(X, W, S, C)
+
+    @staticmethod
     @torch.autograd.function.once_differentiable
-    def backward(ctx, grad_output):
-        return cudakan.b_sigmoid(grad_output)
+    def backward(ctx, dY):
+        X, W, S, C = ctx.saved_tensors
+        B, I, O, G = ctx.vars
+        dX, dW, dS, dC = cudakan.fftkan_backward(dY, X, W, S, C, B, I, O, G)
+
+        return dX, dW, dS, dC, None, None, None, None
 
 
-B = 10
-G = 10
-I = 10
-O = 10
+B = 5
+G = 5
+I = 5
+O = 5
 
-#   // X [B, I]
-#   // W [O, I]
-#   // S [O, I]
-#   // C [O, I, G, 2]
-#   // -> Y [B, O]
+X = torch.randn(B, I, device="cuda", requires_grad=True)
+W = torch.randn(O, I, device="cuda", requires_grad=True)
+S = torch.randn(O, I, device="cuda", requires_grad=True)
+C = torch.randn(O, I, 2, G, device="cuda", requires_grad=True)
 
-# X = torch.tensor([[np.pi]], device="cuda")
-# W = torch.tensor([[0.0], [0.0]], device="cuda")
-# S = torch.tensor([[0.0], [1.0]], device="cuda")
-# # [cos, sin]
-# C = torch.tensor([[[[0.0]], [[1.0]]], [[[0.0]], [[1.0]]]], device="cuda")
+y = FFTKAN.apply(X, W, S, C, B, I, O, G).mean()
+y.backward()
 
-X = torch.randn(B, I, device="cuda")
-W = torch.randn(O, I, device="cuda")
-S = torch.randn(O, I, device="cuda")
-C = torch.randn(O, I, 2, G, device="cuda")
+g_X = X.grad.clone()
+g_W = W.grad.clone()
+g_S = S.grad.clone()
+g_C = C.grad.clone()
 
-print(X, W, S, C)
+X.grad = None
+W.grad = None
+S.grad = None
+C.grad = None
 
-y = FFTKAN.apply(X, W, S, C, B, I, O, G)
-# y2 = FFTKAN.apply(X, W, S, C, B, G, I, O)
+y2 = fftkan2(X, W, S, C, B, I, O, G).mean()
+y2.backward()
 
-y2 = fftkan(X, W, S, C, B, I, O, G)
+print(torch.abs(y - y2).max())
+print(torch.abs(g_X - X.grad).max())  # Invalid
+print(torch.abs(g_W - W.grad).max())
+print(torch.abs(g_S - S.grad).max())
+print(torch.abs(g_C - C.grad).max())
 
 print("out: ", y, y2)
 
