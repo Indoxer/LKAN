@@ -14,12 +14,12 @@ __global__ void fftkan_cuda_forward_kernel(
   // X [B, I]
   // W [O, I]
   // S [O, I]
-  // C [2, O, G]
+  // C [2, O, I, G]
   // -> Y [B, O]
   int b = blockIdx.x * blockDim.x + threadIdx.x;
   int o = blockIdx.y * blockDim.y + threadIdx.y;
 
-  if (b < B || o < O)
+  if (b < B && o < O)
   {
         scalar_t sum = 0.0f;
         for (int i = 0; i < I; i++)
@@ -60,6 +60,8 @@ torch::Tensor fftkan_cuda_forward(torch::Tensor X, torch::Tensor W, torch::Tenso
                B, I, O, G); 
         })
     );
+
+    cudaDeviceSynchronize();
 
     return Y;
 }

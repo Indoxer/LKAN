@@ -68,7 +68,7 @@ def curve2coeff(x, y, grid, k, eps=1e-8):
 # fftkan2 = cudakan.fftkan
 
 
-def fftkan(X, W, S, C, B, G, I, O):
+def fftkan(X, W, S, C, B, I, O, G):
     """Notation used in the code: (I have equations that match this notation (easiest to write code in cuda))
 
     Args:
@@ -105,7 +105,7 @@ def fftkan(X, W, S, C, B, G, I, O):
     y_spline = F.linear(
         splines.view(batch_size, -1),
         (C * S.unsqueeze(-1)).view(O, -1),
-    )  # [batch_size, in_dim * G * 2] @ [out_dim, in_dim * G * 2]^T = [batch, out_dim]
+    )  # [batch_size, in_dim * grid_size * 2] @ [out_dim, in_dim * grid_size * 2]^T = [batch, out_dim]
 
     y = y_b + y_spline
 

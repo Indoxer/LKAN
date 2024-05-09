@@ -13,8 +13,8 @@ cudakan = load(
 
 class FFTKAN(torch.autograd.Function):
     @staticmethod
-    def forward(ctx, X, W, S, C, B, G, I, O):
-        return cudakan.fftkan_forward(X, W, S, C, B, G, I, O)
+    def forward(ctx, X, W, S, C, B, I, O, G):
+        return cudakan.fftkan_forward(X, W, S, C, B, I, O, G)
 
     @staticmethod
     @torch.autograd.function.once_differentiable
@@ -22,10 +22,10 @@ class FFTKAN(torch.autograd.Function):
         return cudakan.b_sigmoid(grad_output)
 
 
-B = 200
+B = 1
 G = 1
 I = 1
-O = 1
+O = 2
 
 #   // X [B, I]
 #   // W [O, I]
@@ -33,24 +33,23 @@ O = 1
 #   // C [2, O, I, G]
 #   // -> Y [B, O]
 
-# X = torch.tensor([[0.5], [1.0]], device="cuda")
-# W = torch.tensor([[1.0]], device="cuda")
-# S = torch.tensor([[0.0]], device="cuda")
-# C = torch.tensor([[[[0.0]]], [[[0.0]]]], device="cuda")
+# X = torch.tensor([[0.5]], device="cuda")
+# W = torch.tensor([[1.0], [1.0]], device="cuda")
+# S = torch.tensor([[0.0], [0.0]], device="cuda")
+# C = torch.tensor([[[[0.0]], [[0.0]]], [[[0.0]], [[0.0]]]], device="cuda")
 
 X = torch.randn(B, I, device="cuda")
-W = torch.randn(O, I, device="cuda")
-S = torch.randn(O, I, device="cuda") * 0.0
-C = torch.randn(2, O, I, G, device="cuda") * 0.0
+W = torch.randn(O, I, device="cuda") * 0.0
+S = torch.randn(O, I, device="cuda")
+C = torch.randn(2, O, I, G, device="cuda")
 
 print(X, W, S, C)
 
-y = FFTKAN.apply(X, W, S, C, B, G, I, O)
+y = FFTKAN.apply(X, W, S, C, B, I, O, G)
+# y2 = FFTKAN.apply(X, W, S, C, B, G, I, O)
 
-print(X, W, S, C)
+y2 = fftkan(X, W, S, C, B, I, O, G)
 
-y2 = fftkan(X, W, S, C, B, G, I, O)
-
-print(y, y2)
+print("out: ", y, y2)
 
 print(torch.abs(y - y2).mean().item())
