@@ -3,7 +3,9 @@ Implementations of KAN variations.
 
 # Installation
 
-### !!! CUDA version is not ready, just install with ``pip install .``
+# CUDA version
+
+KANLinearFFT (200 % memory improvment, but 40% performance of efficient KAN)
 
 ### WAY 1 (I don't tested):
 installed python 3.10 + nvcc

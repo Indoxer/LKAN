@@ -4,7 +4,7 @@ import numpy as np
 import torch
 from torch.nn import functional as F
 
-from lkan.utils.kan import fftkan
+from lkan.utils.kan import efficient_fftkan
 
 from .kan_linear import KANLinear
 from .kan_linear_fft import KANLinearFFT
@@ -115,7 +115,7 @@ class KANConv2d(torch.nn.Module):
         shape = x.shape[:-1]
         x = x.view(-1, self.kernel_size**2)
 
-        y = fftkan(
+        y = efficient_fftkan(
             x,
             scale_base,
             scale_spline,
@@ -142,19 +142,6 @@ class KANConv2d(torch.nn.Module):
             )  # [batch, patches, in_channels, kernel_size**2]
         ).contiguous()
 
-        # x = torch.stack(
-        #     [
-        #         self.convolve(
-        #             x[:, :, i, :].contiguous(),
-        #             self.scale_base[i],
-        #             self.scale_spline[i],
-        #             self.coeff[i],
-        #         )
-        #         for i in range(self.in_channels)
-        #     ],
-        #     dim=2,
-        # )
-        # x = x.sum(dim=2)
         x = torch.vmap(self.convolve, (2, 0, 0, 0), 2, chunk_size=self.chunk_size)(
             x,
             self.scale_base,

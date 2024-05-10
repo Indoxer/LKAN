@@ -1,5 +1,6 @@
 import os
 
+import kancpp
 import torch
 import torch.nn.functional as F
 from torch.utils.cpp_extension import load
@@ -63,59 +64,38 @@ def curve2coeff(x, y, grid, k, eps=1e-8):
     return value
 
 
-global fftkan_cuda_s
-fftkan_cuda_s = None
+class FFTKANCUDA(torch.autograd.Function):
+    @staticmethod
+    def forward(X, W, S, C, B, I, O, G):
+        return kancpp.fftkan_forward(X, W, S, C, B, I, O, G)
+
+    @staticmethod
+    def setup_context(ctx, inputs, output):
+        X, W, S, C, B, I, O, G = inputs
+        ctx.vars = (B, I, O, G)
+        ctx.save_for_backward(X, W, S, C)
+
+    @staticmethod
+    @torch.autograd.function.once_differentiable
+    def backward(ctx, dY):
+        X, W, S, C = ctx.saved_tensors
+        B, I, O, G = ctx.vars
+        dX, dW, dS, dC = kancpp.fftkan_backward(dY, X, W, S, C, B, I, O, G)
+
+        return dX, dW, dS, dC, None, None, None, None
 
 
-def fftkan_cuda(*args):
-    global fftkan_cuda_s
-    if fftkan_cuda_s is None:
-        path = os.path.dirname(__file__)
-
-        sources = [
-            os.path.join(path, "src", f)
-            for f in os.listdir(os.path.join(path, "src"))
-            if f.endswith(".cpp") or f.endswith(".cu")
-        ]
-
-        cudakan = load(
-            name="cudakan",
-            sources=sources,
-        )
-
-        class FFTKANCUDA(torch.autograd.Function):
-            @staticmethod
-            def forward(X, W, S, C, B, I, O, G):
-                return cudakan.fftkan_forward(X, W, S, C, B, I, O, G)
-
-            @staticmethod
-            def setup_context(ctx, inputs, output):
-                X, W, S, C, B, I, O, G = inputs
-                ctx.vars = (B, I, O, G)
-                ctx.save_for_backward(X, W, S, C)
-
-            @staticmethod
-            @torch.autograd.function.once_differentiable
-            def backward(ctx, dY):
-                X, W, S, C = ctx.saved_tensors
-                B, I, O, G = ctx.vars
-                dX, dW, dS, dC = cudakan.fftkan_backward(dY, X, W, S, C, B, I, O, G)
-
-                return dX, dW, dS, dC, None, None, None, None
-
-        fftkan_cuda_s = FFTKANCUDA.apply
-
-    return fftkan_cuda_s(*args)
+fftkan_cuda = FFTKANCUDA.apply
 
 
-def fftkan(X, W, S, C, B, I, O, G):
+def efficient_fftkan(X, W, S, C, B, I, O, G):
     """Notation used in the code: (I have equations that match this notation (easiest to write code in cuda))
 
     Args:
         X (torch.Tensor): input tensor of shape [batch, in_dim]
         W (torch.Tensor): silu(x) weights of shape [out_dim, in_dim]
         S (torch.Tensor): spline scale of shape [out_dim, in_dim]
-        C (torch.Tensor): spline coefficients of shape [out_dim, in_dim, 2, grid_size]
+        C (torch.Tensor): spline coefficients of shape [2, out_dim, in_dim, grid_size]
         B (int): batch size
         G (int): grid size
         I (int): in_dim
@@ -144,7 +124,7 @@ def fftkan(X, W, S, C, B, I, O, G):
 
     y_spline = F.linear(
         splines.view(batch_size, -1),
-        (C * S.unsqueeze(-1).unsqueeze(-1)).view(O, -1),
+        (C.permute(1, 2, 0, 3) * S.unsqueeze(-1).unsqueeze(-1)).reshape(O, -1),
     )  # [batch_size, in_dim * grid_size * 2] @ [out_dim, in_dim * grid_size * 2]^T = [batch, out_dim]
 
     y = y_b + y_spline

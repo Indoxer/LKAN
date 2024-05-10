@@ -2,7 +2,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-from lkan.utils.kan import fftkan, fftkan_cuda
+from lkan.utils.kan import efficient_fftkan, fftkan_cuda
 
 
 class KANLinearFFT(torch.nn.Module):
@@ -20,7 +20,6 @@ class KANLinearFFT(torch.nn.Module):
         sp_trainable=True,
         sb_trainable=True,
         device="cpu",
-        cpp=False,
     ):
         torch.nn.Module.__init__(self)
         self.in_dim = in_dim
@@ -29,7 +28,6 @@ class KANLinearFFT(torch.nn.Module):
         self.size = in_dim * out_dim
         self.grid_size = grid_size
         self.device = device
-        self.cpp = cpp
 
         k = torch.arange(1, self.grid_size + 1, device=device).view(
             1, 1, self.grid_size
@@ -52,7 +50,7 @@ class KANLinearFFT(torch.nn.Module):
             self.register_buffer("scale_spline", torch.tensor([1.0], device=device))
 
         self.coeff = torch.nn.Parameter(
-            torch.rand(out_dim, in_dim, 2, grid_size, device=device)
+            torch.rand(2, out_dim, in_dim, grid_size, device=device)
             * noise_scale
             / (np.sqrt(in_dim) * np.sqrt(grid_size)),
         )  # [out_dim, in_dim,2, grid_size]
@@ -77,7 +75,7 @@ class KANLinearFFT(torch.nn.Module):
         shape = x.shape[:-1]
         x = x.reshape(-1, self.in_dim)
 
-        if self.device == "cuda" and self.cpp is True:
+        if self.device == "cuda":
             y = fftkan_cuda(
                 x,
                 self.scale_base,
@@ -89,7 +87,7 @@ class KANLinearFFT(torch.nn.Module):
                 self.grid_size,
             )
         else:
-            y = fftkan(
+            y = efficient_fftkan(
                 x,
                 self.scale_base,
                 self.scale_spline,
@@ -99,37 +97,6 @@ class KANLinearFFT(torch.nn.Module):
                 self.out_dim,
                 self.grid_size,
             )
-
-        # x [batch, in_dim]
-
-        # [batch, in_dim, 2*grid_size]
-
-        # splines = x.view(*x.shape, 1).expand(-1, -1, 2 * self.grid_size)
-
-        # splines_cos = torch.cos(splines[:, :, : self.grid_size] * self.k)
-        # splines_sin = torch.sin(splines[:, :, self.grid_size :] * self.k)
-
-        # splines = torch.cat([splines_cos, splines_sin], dim=-1)
-
-        # ####### Efficient KAN forward #########
-
-        # batch_size = x.shape[0]
-        # y_b = F.linear(self.base_fun(x), self.scale_base)
-        # # [batch_size, in_dim] @ [out_dim, in_dim]^T = [batch_size, out_dim]
-
-        # y_spline = F.linear(
-        #     splines.view(batch_size, -1),
-        #     (self.coeff * self.scale_spline.unsqueeze(-1).unsqueeze(-1)).view(
-        #         self.out_dim, -1
-        #     ),
-        # )  # [batch_size, in_dim * grid_size * 2] @ [out_dim, in_dim * grid_size * 2]^T = [batch, out_dim]
-
-        # y = y_b + y_spline
-
-        # if self.bias is not None:
-        #     y = y + self.bias
-
-        #######################################################################
 
         y = y.reshape(*shape, self.out_dim)
 
