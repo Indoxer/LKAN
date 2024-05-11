@@ -1,17 +1,6 @@
 import torch
 
-from lkan.utils.kan import efficient_fftkan, fftkan_cuda
-
-B = 200
-G = 30
-I = 200
-O = 200
-
-X = torch.rand((B, I), device="cuda", requires_grad=True)
-Y = torch.rand((B, O), device="cuda", requires_grad=True)
-W = torch.rand((O, I), device="cuda", requires_grad=True)
-S = torch.rand((O, I), device="cuda", requires_grad=True)
-C = torch.rand((2, O, I, G), device="cuda", requires_grad=True)
+from lkan.utils.kan import efficient_fftkan, fftkan
 
 
 def benchmark(X, Y, layer, name, times, args):
@@ -62,7 +51,18 @@ def benchmark(X, Y, layer, name, times, args):
     )
 
 
-args = (W, S, C, B, I, O, G)
+B = 200
+G = 300
+I = 200
+O = 200
+
+X = torch.rand((B, I), device="cuda", requires_grad=True)
+Y = torch.rand((B, O), device="cuda", requires_grad=True)
+W = torch.rand((O, I), device="cuda", requires_grad=True)
+S = torch.rand((O, I), device="cuda", requires_grad=True)
+C = torch.rand((2, O, I, G), device="cuda", requires_grad=True)
+
+args = (W, S, C)
 
 benchmark(X, Y, efficient_fftkan, "efficient kan", 10, args)
-benchmark(X, Y, fftkan_cuda, "fftkan cuda", 10, args)
+benchmark(X, Y, fftkan, "fftkan cuda", 10, args)

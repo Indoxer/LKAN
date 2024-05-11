@@ -2,7 +2,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-from lkan.utils.kan import efficient_fftkan, fftkan_cuda
+from lkan.utils.kan import efficient_fftkan, fftkan
 
 
 class KANLinearFFT(torch.nn.Module):
@@ -20,6 +20,7 @@ class KANLinearFFT(torch.nn.Module):
         sp_trainable=True,
         sb_trainable=True,
         device="cpu",
+        cpp=True,
     ):
         torch.nn.Module.__init__(self)
         self.in_dim = in_dim
@@ -28,6 +29,7 @@ class KANLinearFFT(torch.nn.Module):
         self.size = in_dim * out_dim
         self.grid_size = grid_size
         self.device = device
+        self.cpp = cpp
 
         k = torch.arange(1, self.grid_size + 1, device=device).view(
             1, 1, self.grid_size
@@ -71,36 +73,18 @@ class KANLinearFFT(torch.nn.Module):
         else:
             self.bias = None
 
-    def forward(self, x):
-        shape = x.shape[:-1]
-        x = x.reshape(-1, self.in_dim)
-
-        if self.device == "cuda":
-            y = fftkan_cuda(
-                x,
-                self.scale_base,
-                self.scale_spline,
-                self.coeff,
-                x.shape[0],
-                self.in_dim,
-                self.out_dim,
-                self.grid_size,
-            )
+        if cpp is True and device == "cuda":
+            self.fftkan = fftkan
         else:
-            y = efficient_fftkan(
-                x,
-                self.scale_base,
-                self.scale_spline,
-                self.coeff,
-                x.shape[0],
-                self.in_dim,
-                self.out_dim,
-                self.grid_size,
-            )
+            self.fftkan = efficient_fftkan
 
-        y = y.reshape(*shape, self.out_dim)
-
-        return y
+    def forward(self, x):
+        return self.fftkan(
+            x,
+            self.scale_base,
+            self.scale_spline,
+            self.coeff,
+        )
 
     def regularization_loss(self, regularize_activation=1.0, regularize_entropy=1.0):
         l1_fake = self.coeff.abs().mean(-1)

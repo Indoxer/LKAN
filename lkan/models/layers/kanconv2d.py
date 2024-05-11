@@ -4,7 +4,7 @@ import numpy as np
 import torch
 from torch.nn import functional as F
 
-from lkan.utils.kan import efficient_fftkan
+from lkan.utils.kan import conv_efficient_fftkan
 
 from .kan_linear import KANLinear
 from .kan_linear_fft import KANLinearFFT
@@ -19,6 +19,7 @@ class KANConv2d(torch.nn.Module):
         stride=1,
         padding=0,
         dilation=1,
+        groups=1,
         bias=True,
         grid_size=3,
         noise_scale=0.1,
@@ -37,6 +38,7 @@ class KANConv2d(torch.nn.Module):
         self.stride = stride
         self.padding = padding
         self.dilation = dilation
+        self.groups = groups
 
         self.grid_size = grid_size
         self.base_fun = base_fun
@@ -49,7 +51,7 @@ class KANConv2d(torch.nn.Module):
             self.scale_spline = torch.nn.Parameter(
                 torch.full(
                     (
-                        self.in_channels,
+                        self.in_channels / self.groups,
                         out_channels,
                         kernel_size**2,
                     ),
@@ -63,10 +65,10 @@ class KANConv2d(torch.nn.Module):
 
         self.coeff = torch.nn.Parameter(
             torch.rand(
-                self.in_channels,
+                self.in_channels / self.groups,
+                2,
                 out_channels,
                 kernel_size**2,
-                2,
                 grid_size,
                 device=device,
             )
@@ -79,7 +81,7 @@ class KANConv2d(torch.nn.Module):
                 1 / (kernel_size**2**0.5)
                 + (
                     torch.randn(
-                        self.in_channels,
+                        self.in_channels / self.groups,
                         self.out_channels,
                         self.kernel_size**2,
                         device=device,
@@ -101,68 +103,18 @@ class KANConv2d(torch.nn.Module):
         else:
             self.bias = bias
 
-        self.unfold = torch.nn.Unfold(
-            kernel_size=kernel_size, stride=stride, padding=padding, dilation=dilation
-        )
-
-    def convolve(
-        self,
-        x,
-        scale_base,
-        scale_spline,
-        coeff,
-    ):
-        shape = x.shape[:-1]
-        x = x.view(-1, self.kernel_size**2)
-
-        y = efficient_fftkan(
-            x,
-            scale_base,
-            scale_spline,
-            coeff,
-            x.shape[0],
-            self.kernel_size**2,
-            self.out_channels,
-            self.grid_size,
-        )
-
-        y = y.view(*shape, self.out_channels)
-
-        return y
+        self.conv_fftkan = conv_efficient_fftkan
 
     def forward(self, x):
-        shape = x.shape
-        x = x.view(-1, shape[-3], shape[-2], shape[-1])  # [batch, in_channels, h, w]
-
-        x = (
-            self.unfold(x)  # [batch, patches, in_channels * kernel_size**2]
-            .permute(0, 2, 1)  # [batch, in_channels * kernel_size**2, patches]
-            .view(
-                x.shape[0], -1, self.in_channels, self.kernel_size**2
-            )  # [batch, patches, in_channels, kernel_size**2]
-        ).contiguous()
-
-        x = torch.vmap(self.convolve, (2, 0, 0, 0), 2, chunk_size=self.chunk_size)(
+        x = self.conv_fftkan(
             x,
-            self.scale_base,
-            self.scale_spline,
             self.coeff,
-        ).sum(dim=2)
-
-        if self.bias is not False:
-            x = x + self.bias[None, None, :]
-
-        h = math.floor(
-            (shape[-2] + 2 * self.padding - self.dilation * (self.kernel_size - 1) - 1)
-            / self.stride
-            + 1
+            self.scale_spline,
+            self.scale_base,
+            self.bias,
+            stride=self.stride,
+            padding=self.padding,
+            dilation=self.dilation,
+            groups=self.groups,
         )
-        w = math.floor(
-            (shape[-1] + 2 * self.padding - self.dilation * (self.kernel_size - 1) - 1)
-            / self.stride
-            + 1
-        )
-
-        x = x.permute(0, 2, 1).view(*shape[:-3], self.out_channels, h, w)
-
         return x

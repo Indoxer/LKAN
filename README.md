@@ -3,10 +3,6 @@ Implementations of KAN variations.
 
 # Installation
 
-# CUDA version
-
-KANLinearFFT (200 % memory improvment, but 40% performance of efficient KAN)
-
 ### WAY 1 (I don't tested):
 installed python 3.10 + nvcc
 
@@ -40,6 +36,8 @@ KANLinear0 (32.3 M parameters) - 4.3 it/s
 KANLinear (31M parameters) - 36.5 it/s 
 
 KANLinearFFT (33M parameters) - 40 it/s
+
+KANLinearFFT CUDA (200 % memory improvment) = 23 it/s
 
 ## KANConv2d on MNIST:
 

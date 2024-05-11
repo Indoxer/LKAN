@@ -1,6 +1,6 @@
 import torch
 
-from lkan.utils.kan import efficient_fftkan, fftkan_cuda
+from lkan.utils.kan import efficient_fftkan, fftkan
 
 B = 1
 G = 1
@@ -12,7 +12,7 @@ W = torch.rand((O, I), device="cuda", requires_grad=True)
 S = torch.rand((O, I), device="cuda", requires_grad=True)
 C = torch.rand((2, O, I, G), device="cuda", requires_grad=True)
 
-y1 = efficient_fftkan(X, W, S, C, B, G, I, O).mean()
+y1 = efficient_fftkan(X, W, S, C).mean()
 y1.backward()
 
 dX = X.grad.clone()
@@ -25,7 +25,7 @@ W.grad = None
 S.grad = None
 C.grad = None
 
-y2 = fftkan_cuda(X, W, S, C, B, G, I, O).mean()
+y2 = fftkan(X, W, S, C).mean()
 y2.backward()
 
 print(

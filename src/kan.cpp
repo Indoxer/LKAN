@@ -1,38 +1,46 @@
 #include <torch/extension.h>
 
+#include "kan.hpp"
 #include <iostream>
 
-#define CHECK_CUDA(x) TORCH_CHECK(x.device().is_cuda(), #x " must be a CUDA tensor")
-#define CHECK_CONTIGUOUS(x) TORCH_CHECK(x.is_contiguous(), #x " must be contiguous")
-#define CHECK_INPUT(x) CHECK_CUDA(x); CHECK_CONTIGUOUS(x)
-
-torch::Tensor fftkan_cuda_forward(torch::Tensor X, torch::Tensor W, torch::Tensor S, torch::Tensor C, int B, int I, int O, int G);  
-std::tuple<torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor>  fftkan_cuda_backward(torch::Tensor dY, torch::Tensor X, torch::Tensor W, torch::Tensor S, torch::Tensor C, int B, int I, int O, int G);
-
-torch::Tensor fftkan_forward(torch::Tensor X, torch::Tensor W, torch::Tensor S, torch::Tensor C, int B, int I, int O, int G)
+torch::Tensor fftkan_forward(torch::Tensor X, torch::Tensor scale_base, torch::Tensor scale_spline, torch::Tensor coeff, int batch_size, int in_dim, int out_dim, int grid_size)
 {
-    CHECK_INPUT(X);
-    CHECK_INPUT(W);
-    CHECK_INPUT(S);
-    CHECK_INPUT(C);
+  CHECK_CONTIGUOUS(X);
+  CHECK_CONTIGUOUS(scale_base);
+  CHECK_CONTIGUOUS(scale_spline);
+  CHECK_CONTIGUOUS(coeff);
 
-    return fftkan_cuda_forward(X, W, S, C, B, I, O, G);
+  if (X.is_cuda())
+  {
+    CHECK_CUDA(X);
+    CHECK_CUDA(scale_base);
+    CHECK_CUDA(scale_spline);
+    CHECK_CUDA(coeff);
+
+    return fftkan_cuda_forward(X, scale_base, scale_spline, coeff, batch_size, in_dim, out_dim, grid_size);
+  }
+  TORCH_CHECK(false, "CPU version not implemented yet");
+  // return fftkan_cpu_forward(X, scale_base, scale_spline, coeff, batch_size, in_dim, out_dim, grid_size);
 }
 
-std::tuple<torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor> fftkan_backward(torch::Tensor dY, torch::Tensor X, torch::Tensor W, torch::Tensor S, torch::Tensor C, int B, int I, int O, int G){
-    CHECK_INPUT(dY);
-    CHECK_INPUT(X);
-    CHECK_INPUT(W);
-    CHECK_INPUT(S);
-    CHECK_INPUT(C);
+std::tuple<torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor> fftkan_backward(torch::Tensor dY, torch::Tensor X, torch::Tensor scale_base, torch::Tensor scale_spline, torch::Tensor coeff, int batch_size, int in_dim, int out_dim, int grid_size)
+{
+  CHECK_CONTIGUOUS(dY);
+  CHECK_CONTIGUOUS(X);
+  CHECK_CONTIGUOUS(scale_base);
+  CHECK_CONTIGUOUS(scale_spline);
+  CHECK_CONTIGUOUS(coeff);
 
-    return fftkan_cuda_backward(dY, X, W, S, C, B, I, O, G);
+  if (X.is_cuda())
+  {
+    CHECK_CUDA(dY);
+    CHECK_CUDA(X);
+    CHECK_CUDA(scale_base);
+    CHECK_CUDA(scale_spline);
+    CHECK_CUDA(coeff);
 
+    return fftkan_cuda_backward(dY, X, scale_base, scale_spline, coeff, batch_size, in_dim, out_dim, grid_size);
+  }
+  TORCH_CHECK(false, "CPU version not implemented yet");
+  // return fftkan_cpu_backward(dY, X, scale_base, scale_spline, coeff, batch_size, in_dim, out_dim, grid_size);
 }
-
-PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
-  m.def("fftkan_forward", &fftkan_forward, "FFTKAN forward (CUDA)");
-  m.def("fftkan_backward", &fftkan_backward, "FFTKAN backward (CUDA)");
-}
-
-
