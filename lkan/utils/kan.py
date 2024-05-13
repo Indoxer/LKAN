@@ -136,6 +136,31 @@ class Conv2dFFTKAN(torch.autograd.Function):
         dilation=1,
         groups=1,
     ):
+        batch_size = X.shape(0)
+        in_channels = X.shape[1]
+        hw = X.shape[2:]
+        out_channels = scale_base.shape[0]
+        kernel_size = scale_base.shape[2:]
+        grid_size = coeff.shape[-1]
+
+        return kancpp.conv2d_fftkan_forward(
+            X,
+            scale_base,
+            scale_spline,
+            coeff,
+            bias,
+            stride,
+            padding,
+            dilation,
+            groups,
+            batch_size,
+            in_channels,
+            hw,
+            out_channels,
+            kernel_size,
+            grid_size,
+        )
+
         raise NotImplementedError
 
     def setup_context(ctx, inputs, output):
@@ -151,7 +176,25 @@ class Conv2dFFTKAN(torch.autograd.Function):
             groups,
         ) = inputs
 
-        ctx.vars = (stride, padding, dilation, groups)
+        batch_size = X.shape(0)
+        in_channels = X.shape[1]
+        hw = X.shape[2:]
+        out_channels = scale_base.shape[0]
+        kernel_size = scale_base.shape[2:]
+        grid_size = coeff.shape[-1]
+
+        ctx.vars = (
+            stride,
+            padding,
+            dilation,
+            groups,
+            batch_size,
+            in_channels,
+            hw,
+            out_channels,
+            kernel_size,
+            grid_size,
+        )
 
         ctx.save_for_backward(X, scale_base, scale_spline, coeff, bias)
 

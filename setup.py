@@ -15,10 +15,10 @@ sources = [
 ]
 
 setup(
-    ext_modules=[cpp_extension.CppExtension("kancpp", sources)],
+    ext_modules=[cpp_extension.CUDAExtension("kancpp", sources)],
     cmdclass={"build_ext": cpp_extension.BuildExtension},
     name="LKAN",
-    description="KAN efficient models for easy use in PyTorch.",
+    description="KAN models for easy use in PyTorch.",
     author="Indoxer",
     author_email="indoxer.mk@gmail.com",
     version="0.0.1",
