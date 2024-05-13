@@ -2,16 +2,6 @@
 Implementations of KAN variations.
 
 # Installation
-
-### WAY 1 (I don't tested):
-installed python 3.10 + nvcc compiler
-
-```
-pip install -r requirements.txt
-pip install .
-```
-
-### The best way:
 Install [conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html)
 
 ```
