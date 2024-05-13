@@ -191,6 +191,7 @@ def efficient_fftkan(
     return y.contiguous()
 
 
+# TODO: How to test this?
 def conv2d_efficient_fftkan(
     x, scale_base, scale_spline, coeff, bias, stride=1, padding=0, dilation=1, groups=1
 ):

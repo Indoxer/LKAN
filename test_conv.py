@@ -18,7 +18,7 @@ class MLP(nn.Module):
         super().__init__()
         self.layers = nn.Sequential(
             nn.Conv2d(
-                in_channels=1, out_channels=32, kernel_size=5, stride=1, padding=2
+                in_channels=3, out_channels=32, kernel_size=5, stride=1, padding=2
             ),
             nn.ReLU(),
             nn.MaxPool2d(2),
@@ -26,7 +26,7 @@ class MLP(nn.Module):
             nn.ReLU(),
             nn.MaxPool2d(2),
             nn.Flatten(),
-            nn.Linear(32 * 7 * 7, 10),
+            nn.Linear(32 * 8 * 8, 10),
         )
 
     def forward(self, x):
@@ -40,16 +40,17 @@ class KAN(nn.Module):
         self.layers = nn.Sequential(
             KANConv2d(
                 in_channels=3,
-                out_channels=5,
+                out_channels=6,
                 kernel_size=5,
                 stride=1,
                 padding=2,
+                grid_size=5,
             ),
             nn.MaxPool2d(2),
-            KANConv2d(5, 6, 5, 1, 2),
+            KANConv2d(6, 5, 5, 1, 2, grid_size=5),
             nn.MaxPool2d(2),
             nn.Flatten(),
-            KANLinearFFT(6 * 8 * 8, 10),
+            KANLinearFFT(5 * 8 * 8, 10, grid_size=5, cpp=False),
         )
 
     def forward(self, x):
@@ -62,8 +63,8 @@ data_dir = ".data/"
 batch_size = 64
 split_ratio = 0.8
 
-lr = 0.0003
-epochs = 4
+lr = 0.00025  # 0.001
+epochs = 8
 
 transform = torchvision.transforms.Compose(
     [
@@ -92,14 +93,6 @@ print(f"Number of parameters: {counter}")
 
 opt = torch.optim.AdamW(model.parameters(), lr=lr)
 
-# prof = torch.profiler.profile(
-#     on_trace_ready=torch.profiler.tensorboard_trace_handler(".logs/kanconv"),
-#     record_shapes=True,
-#     profile_memory=True,
-#     with_stack=True,
-# )
-
-# prof.start()
 
 for epoch in range(epochs):
     train_acc = 0
@@ -114,7 +107,6 @@ for epoch in range(epochs):
 
         loss.backward()
         opt.step()
-        # prof.step()
 
         train_acc += (y_pred.argmax(1) == y).float().mean().item()
         avg_train_loss += loss.item()
@@ -131,22 +123,8 @@ for epoch in range(epochs):
             loss = nn.CrossEntropyLoss()(y_pred, y)
             acc += (y_pred.argmax(1) == y).float().mean().item()
             avg_loss += loss.item()
-            # prof.step()
         acc /= len(loader_val)
         avg_loss /= len(loader_val)
         print(
             f"Epoch {epoch+1}/{epochs} - Train Loss: {avg_train_loss} - Val Loss: {avg_loss} - Train Acc: {train_acc} -Val Acc: {acc}"
         )
-
-# prof.stop()
-
-# print(
-#     prof.key_averages(group_by_stack_n=5).table(
-#         sort_by="self_cpu_time_total", row_limit=8
-#     )
-# )
-# print(
-#     prof.key_averages(group_by_stack_n=5).table(
-#         sort_by="self_cuda_time_total", row_limit=8
-#     )
-# )

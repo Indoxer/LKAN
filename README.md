@@ -39,21 +39,11 @@ KANLinearFFT (33M parameters) - 40 it/s
 
 KANLinearFFT CUDA (50% memory of KANLinearFFT for forward and backward) = 23 it/s
 
-## KANConv2d on MNIST:
-
-`test_conv.py` - file with training code
-
-MNIST, batch_size=64, epochs=5, lr=0.0003
-
-Normal CNN (42154 parameters) 98,85% accuracy (130 it/s - memory bootleneck on MNIST, so real performance is better)
-
-Convolution KAN (40050 parameters) - 97,3% accuracy (need hyperparameter tuning or architecture change, KANLinearFFT is problematic in small size because of O(N^2\*L\*2\*G), for small N and L like CNN kernels, 2\*G is significant) (44 it/s - need more optimization)
-
 # Docs
 
 See examples/
 
-`continual_training.ipynb` - continual training, comparison of mlp, KANLinear and KanLinearFFT
+`continual_training_adam.ipynb`, `continual_training_lbfgs.ipynb` - continual training
 
 # Problems
 - [ ] update_grid on cuda raise error (torch.linalg.lstsq assume full rank on cuda, only one algorithm) - solved temporary, moved calculating lstsq to cpu
@@ -69,7 +59,7 @@ See examples/
 - [ ] remove unnecessary dependencies in requirements.txt
 - [ ] test update_grid and "Other possibilities are: (a) the grid is learnable with gradient descent" from paper. 
 - [ ] Regularization
-- [ ] Compare with MLP
+- [x] Compare with MLP
 - [ ] Grid extension
 - [x] MNIST
 - [ ] CIFAR10
