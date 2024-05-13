@@ -20,7 +20,7 @@ class KANLinearFFT(torch.nn.Module):
         scale_spline_trainable=True,
         scale_base_trainable=True,
         device="cpu",
-        cpp=True,
+        cpp=False,
     ):
         torch.nn.Module.__init__(self)
         self.in_dim = in_dim
