@@ -4,6 +4,7 @@ import os
 import kancpp
 import torch
 import torch.nn.functional as F
+from matplotlib import scale
 from numpy import shape
 from torch.utils.cpp_extension import load
 
@@ -113,34 +114,65 @@ class FFTKAN(torch.autograd.Function):
     @staticmethod
     @torch.autograd.function.once_differentiable
     def backward(ctx, dY):
-        (
-            X,
-            scale_base,
-            scale_spline,
-            coeff,
-        ) = ctx.saved_tensors
-        (
-            batch_size,
-            in_dim,
-            out_dim,
-            grid_size,
-        ) = ctx.vars
         dX, d_scale_base, d_scale_spline, d_coeff_weight = kancpp.fftkan_backward(
-            dY,
-            X,
-            scale_base,
-            scale_spline,
-            coeff,
-            batch_size,
-            in_dim,
-            out_dim,
-            grid_size,
+            dY, *ctx.saved_tensors, *ctx.vars
         )
 
         return dX, d_scale_base, d_scale_spline, d_coeff_weight, None, None, None, None
 
 
 fftkan = FFTKAN.apply
+
+
+class Conv2dFFTKAN(torch.autograd.Function):
+    def forward(
+        X,
+        scale_base,
+        scale_spline,
+        coeff,
+        bias,
+        stride=1,
+        padding=0,
+        dilation=1,
+        groups=1,
+    ):
+        raise NotImplementedError
+
+    def setup_context(ctx, inputs, output):
+        (
+            X,
+            scale_base,
+            scale_spline,
+            coeff,
+            bias,
+            stride,
+            padding,
+            dilation,
+            groups,
+        ) = inputs
+
+        ctx.vars = (stride, padding, dilation, groups)
+
+        ctx.save_for_backward(X, scale_base, scale_spline, coeff, bias)
+
+    @staticmethod
+    @torch.autograd.function.once_differentiable
+    def backward(ctx, dY):
+        dX, d_scale_base, d_scale_spline, d_coeff_weight, d_bias = (
+            kancpp.conv2d_fftkan_backward(dY, *ctx.saved_tensors, *ctx.vars)
+        )
+
+        return (
+            dX,
+            d_scale_base,
+            d_scale_spline,
+            d_coeff_weight,
+            d_bias,
+            None,
+            None,
+            None,
+            None,
+        )
 
 
 def efficient_fftkan(

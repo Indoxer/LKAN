@@ -18,6 +18,7 @@ model_params:
   scale_base_trainable: true
   kan_layer_version: fft
   device: ${trainer_params.device}
+  cpp: false
 trainer: lkan.trainers.BasicKANTrainer
 trainer_params:
     lr: 0.001

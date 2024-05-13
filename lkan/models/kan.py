@@ -23,6 +23,7 @@ class KAN(torch.nn.Module):
         scale_base_trainable: bool = True,
         kan_layer_version: str = "fft",
         device: str = "cpu",
+        cpp: bool = False,
     ) -> None:
         super().__init__()
         self.layers = torch.nn.ModuleList()
@@ -83,6 +84,7 @@ class KAN(torch.nn.Module):
                     scale_spline_trainable=scale_spline_trainable,
                     scale_base_trainable=scale_base_trainable,
                     device=device,
+                    cpp=cpp,
                 )
             else:
                 raise ValueError(f"Unknown kan_layer_version: {kan_layer_version}")

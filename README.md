@@ -4,28 +4,36 @@ Implementations of KAN variations.
 # Installation
 
 ### WAY 1 (I don't tested):
-installed python 3.10 + nvcc
+installed python 3.10 + nvcc compiler
 
 ```
+pip install -r requirements.txt
 pip install .
 ```
 
 ### The best way:
-Install conda https://conda.io/projects/conda/en/latest/user-guide/install/index.html
+Install [conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html)
 
 ```
 conda create -n lkan python==3.10
 conda activate lkan
 conda install cuda-nvcc
+pip install -r requirements.txt
 pip install .
 ```
+`pip install .` can take some time first time
 
+# Running
 
 To run mnist select config in `main.py` and run `main.py`.
 
-To view charts, run `tensorboard --logdir .experiments/`
+To view charts, run `tensorboard --logdir ./.experiments/`
 
-# Info
+# Docs
+
+See examples/
+
+`continual_training_adam.ipynb`, `continual_training_lbfgs.ipynb` - continual training
 
 ## Performance (rtx 2060 mobile, mnist):
 
@@ -35,15 +43,9 @@ KANLinear0 (32.3 M parameters) - 4.3 it/s
 
 KANLinear (31M parameters) - 36.5 it/s 
 
-KANLinearFFT (33M parameters) - 40 it/s
+KANLinearFFT (31,1M parameters) - 40 it/s
 
-KANLinearFFT CUDA (50% memory of KANLinearFFT for forward and backward) = 23 it/s
-
-# Docs
-
-See examples/
-
-`continual_training_adam.ipynb`, `continual_training_lbfgs.ipynb` - continual training
+KANLinearFFT CUDA (30%-50% memory usage compared to KANLinearFFT for forward and backward) = 22 it/s
 
 # Problems
 - [ ] update_grid on cuda raise error (torch.linalg.lstsq assume full rank on cuda, only one algorithm) - solved temporary, moved calculating lstsq to cpu

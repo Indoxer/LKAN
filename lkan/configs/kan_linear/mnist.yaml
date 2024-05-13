@@ -4,19 +4,21 @@ logger: lkan.loggers.TensorBoardLogger
 logger_params: {}
 model_params:
   layers_dims: [784,11,10]
-  grid_size: 3
+  grid_size: 5
   k: 3
   noise_scale: 0.1
   noise_scale_base: 0.1
-  scale_spline: 1.0 # float or null (null only for version b)
+  scale_spline: 1.0 # float or null (null only for version 1)
   base_fun: silu
   grid_eps: 0.02
   grid_range: [-1, 1]
+  bias: true
   bias_trainable: true
   scale_spline_trainable: true
   scale_base_trainable: true
-  kan_layer_version: fft
+  kan_layer_version: 1 # "fft" - fourier kan, "1" - efficient kan, "0" - original kan (The same as efficient kan but easier to understand)
   device: ${trainer_params.device}
+  cpp: false
 trainer: lkan.trainers.ImgKANTrainer
 trainer_params:
     lr: 3e-4
