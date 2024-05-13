@@ -37,7 +37,7 @@ KANLinear (31M parameters) - 36.5 it/s
 
 KANLinearFFT (33M parameters) - 40 it/s
 
-KANLinearFFT CUDA (200 % memory improvment) = 23 it/s
+KANLinearFFT CUDA (50% memory of KANLinearFFT for forward and backward) = 23 it/s
 
 ## KANConv2d on MNIST:
 

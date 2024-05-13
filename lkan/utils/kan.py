@@ -165,11 +165,8 @@ def efficient_fftkan(
 
     base_fun = torch.nn.SiLU()
 
-    # [batch, in_dim, 2*grid_size]
-    splines = X.view(*X.shape, 1).expand(-1, -1, 2 * grid_size)
-
-    splines_cos = torch.cos(splines[:, :, :grid_size] * K)
-    splines_sin = torch.sin(splines[:, :, grid_size:] * K)
+    splines_cos = torch.cos(X.unsqueeze(-1) * K)
+    splines_sin = torch.sin(X.unsqueeze(-1) * K)
 
     # [batch, in_dim, grid_size * 2]
     splines = torch.cat([splines_cos, splines_sin], dim=-1)
@@ -194,55 +191,67 @@ def efficient_fftkan(
     return y.contiguous()
 
 
-def conv_efficient_fftkan(
-    X,
-    scale_base,
-    scale_spline,
-    coeff,
-    bias,
-    stride=1,
-    padding=0,
-    dilation=1,
-    groups=1,
+def conv2d_efficient_fftkan(
+    x, scale_base, scale_spline, coeff, bias, stride=1, padding=0, dilation=1, groups=1
 ):
-    # X = [batch, in_channels, h, w]
+    # x [batch_size, in_channels, h, w]
+    # kernel_size [height, width]
+    # scale_base [out_channels, in_channels/groups, kernel_size[0], kernel_size[1]]
+    # scale_spline [out_channels, in_channels/groups, kernel_size[0], kernel_size[1]]
+    # coeff [2, out_channels, in_channels/groups, kernel_size[0], kernel_size[1], grid_size]
 
-    shape = X.shape
-
+    shape = x.shape
     batch_size = shape[0]
     in_channels = shape[1]
-    out_channels = scale_base.size(1)
 
-    kernel_size = coeff.shape[3] ** (0.5)
+    grid_size = coeff.shape[-1]
 
-    X = (
+    out_channels = scale_base.shape[0]
+    kernel_size = (scale_base.shape[2], scale_base.shape[3])
+
+    base_fun = torch.nn.SiLU()
+    K = torch.arange(1, grid_size + 1, device=x.device).view(1, 1, 1, grid_size)
+
+    x = (
         torch.nn.functional.unfold(
-            X,
+            x,
             kernel_size=kernel_size,
             stride=stride,
             padding=padding,
             dilation=dilation,
-        )  # [batch, patches, in_channels * kernel_size**2]
-        .permute(0, 2, 1)  # [batch, in_channels * kernel_size**2, patches]
-        .view(
-            batch_size, -1, in_channels, kernel_size**2
-        )  # [batch, patches, in_channels, kernel_size**2]
-    ).contiguous()
+        )
+        .transpose(-1, -2)
+        .reshape(-1, groups, (in_channels // groups) * kernel_size[0] * kernel_size[1])
+        .permute(1, 0, 2)
+    )
 
-    X = torch.vmap(efficient_fftkan, (2, 0, 0, 0), 2, chunk_size=4)(
-        X,
-        scale_base,
-        scale_spline,
-        coeff,
-    ).sum(dim=2)
+    y_b = (
+        base_fun(x)
+        @ scale_base.view(groups, out_channels // groups, -1).transpose(-1, -2)
+    ).permute(1, 0, 2)
+
+    splines_cos = torch.cos(x.unsqueeze(-1) * K)
+    splines_sin = torch.sin(x.unsqueeze(-1) * K)
+    splines = torch.cat([splines_cos, splines_sin], dim=-1)
+
+    y_spline = (
+        splines.flatten(2)
+        @ (coeff.permute(1, 2, 3, 4, 0, 5) * scale_spline.unsqueeze(-1).unsqueeze(-1))
+        .reshape(groups, out_channels // groups, -1)
+        .transpose(-1, -2)
+    ).permute(1, 0, 2)
+
+    y = y_b + y_spline + bias
+
+    y = y.reshape(batch_size, -1, out_channels)
 
     h = math.floor(
-        (shape[-2] + 2 * padding - dilation * (kernel_size - 1) - 1) / stride + 1
+        (shape[-2] + 2 * padding - dilation * (kernel_size[0] - 1) - 1) / stride + 1
     )
     w = math.floor(
-        (shape[-1] + 2 * padding - dilation * (kernel_size - 1) - 1) / stride + 1
+        (shape[-1] + 2 * padding - dilation * (kernel_size[1] - 1) - 1) / stride + 1
     )
 
-    X = X.permute(0, 2, 1).view(*shape[:-3], out_channels, h, w)
+    y = y.permute(0, 2, 1).view(batch_size, out_channels, h, w)
 
-    return x
+    return y.contiguous()

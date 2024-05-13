@@ -19,8 +19,8 @@ class KAN(torch.nn.Module):
         grid_eps: float = 1.0,
         grid_range: List[float] = [-1.0, 1.0],
         bias_trainable: bool = True,
-        sp_trainable: bool = True,
-        sb_trainable: bool = True,
+        scale_spline_trainable: bool = True,
+        scale_base_trainable: bool = True,
         kan_layer_version: str = "fft",
         device: str = "cpu",
     ) -> None:
@@ -47,8 +47,8 @@ class KAN(torch.nn.Module):
                     grid_eps=grid_eps,
                     grid_range=grid_range,
                     bias=bias,
-                    sp_trainable=sp_trainable,
-                    sb_trainable=sb_trainable,
+                    scale_spline_trainable=scale_spline_trainable,
+                    scale_base_trainable=scale_base_trainable,
                     device=device,
                 )
             elif kan_layer_version == "0":
@@ -65,8 +65,8 @@ class KAN(torch.nn.Module):
                     grid_range=grid_range,
                     bias=bias,
                     bias_trainable=bias_trainable,
-                    sp_trainable=sp_trainable,
-                    sb_trainable=sb_trainable,
+                    scale_spline_trainable=scale_spline_trainable,
+                    scale_base_trainable=scale_base_trainable,
                     device=device,
                 )
             elif kan_layer_version == "fft":
@@ -80,8 +80,8 @@ class KAN(torch.nn.Module):
                     base_fun=base_fun,
                     bias=bias,
                     bias_trainable=bias_trainable,
-                    sp_trainable=sp_trainable,
-                    sb_trainable=sb_trainable,
+                    scale_spline_trainable=scale_spline_trainable,
+                    scale_base_trainable=scale_base_trainable,
                     device=device,
                 )
             else:

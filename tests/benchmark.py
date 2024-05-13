@@ -51,18 +51,18 @@ def benchmark(X, Y, layer, name, times, args):
     )
 
 
-B = 200
-G = 300
-I = 200
-O = 200
+batch_size = 200
+grid_size = 300
+in_dim = 200
+out_dim = 200
 
-X = torch.rand((B, I), device="cuda", requires_grad=True)
-Y = torch.rand((B, O), device="cuda", requires_grad=True)
-W = torch.rand((O, I), device="cuda", requires_grad=True)
-S = torch.rand((O, I), device="cuda", requires_grad=True)
-C = torch.rand((2, O, I, G), device="cuda", requires_grad=True)
+X = torch.rand((batch_size, in_dim), device="cuda", requires_grad=True)
+Y = torch.rand((batch_size, out_dim), device="cuda", requires_grad=True)
+scale_base = torch.rand((out_dim, in_dim), device="cuda", requires_grad=True)
+scale_spline = torch.rand((out_dim, in_dim), device="cuda", requires_grad=True)
+coeff = torch.rand((2, out_dim, in_dim, grid_size), device="cuda", requires_grad=True)
 
-args = (W, S, C)
+args = (scale_base, scale_spline, coeff)
 
 benchmark(X, Y, efficient_fftkan, "efficient kan", 10, args)
 benchmark(X, Y, fftkan, "fftkan cuda", 10, args)

@@ -39,7 +39,7 @@ class KAN(nn.Module):
         super().__init__()
         self.layers = nn.Sequential(
             KANConv2d(
-                in_channels=1,
+                in_channels=3,
                 out_channels=5,
                 kernel_size=5,
                 stride=1,
@@ -49,7 +49,7 @@ class KAN(nn.Module):
             KANConv2d(5, 6, 5, 1, 2),
             nn.MaxPool2d(2),
             nn.Flatten(),
-            KANLinearFFT(6 * 7 * 7, 10),
+            KANLinearFFT(6 * 8 * 8, 10),
         )
 
     def forward(self, x):
@@ -63,7 +63,7 @@ batch_size = 64
 split_ratio = 0.8
 
 lr = 0.0003
-epochs = 1
+epochs = 4
 
 transform = torchvision.transforms.Compose(
     [
@@ -71,7 +71,7 @@ transform = torchvision.transforms.Compose(
     ]
 )
 
-dataset = torchvision.datasets.MNIST(data_dir, transform=transform, download=True)
+dataset = torchvision.datasets.CIFAR10(data_dir, transform=transform, download=True)
 ds_train, ds_val = torch.utils.data.random_split(
     dataset,
     [int(len(dataset) * split_ratio), len(dataset) - int(len(dataset) * split_ratio)],

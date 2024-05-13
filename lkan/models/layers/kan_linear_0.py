@@ -20,8 +20,8 @@ class KANLinear0(torch.nn.Module):
         grid_eps=0.02,
         grid_range=[-1, +1],
         bias_trainable=True,
-        sp_trainable=True,
-        sb_trainable=True,
+        scale_spline_trainable=True,
+        scale_base_trainable=True,
         device="cpu",
     ):
         super().__init__()
@@ -60,7 +60,7 @@ class KANLinear0(torch.nn.Module):
                 + (torch.randn(self.out_dim, self.in_dim, device=device) * 2 - 1)
                 * noise_scale_base
             ),
-            requires_grad=sb_trainable,
+            requires_grad=scale_base_trainable,
         )
         self.scale_spline = torch.nn.Parameter(
             torch.full(
@@ -71,7 +71,7 @@ class KANLinear0(torch.nn.Module):
                 fill_value=scale_spline,
                 device=device,
             ),
-            requires_grad=sp_trainable,
+            requires_grad=scale_spline_trainable,
         )  # [1, size]
 
         if bias:

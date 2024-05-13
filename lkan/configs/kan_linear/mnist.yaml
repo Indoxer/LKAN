@@ -13,8 +13,8 @@ model_params:
   grid_eps: 0.02
   grid_range: [-1, 1]
   bias_trainable: true
-  sp_trainable: true
-  sb_trainable: true
+  scale_spline_trainable: true
+  scale_base_trainable: true
   kan_layer_version: fft
   device: ${trainer_params.device}
 trainer: lkan.trainers.ImgKANTrainer

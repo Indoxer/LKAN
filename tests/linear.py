@@ -2,30 +2,30 @@ import torch
 
 from lkan.utils.kan import efficient_fftkan, fftkan
 
-B = 1
-G = 1
-I = 1
-O = 1
+batch_size = 4
+grid_size = 4
+in_dim = 4
+out_dim = 4
 
-X = torch.rand((B, I), device="cuda", requires_grad=True)
-W = torch.rand((O, I), device="cuda", requires_grad=True)
-S = torch.rand((O, I), device="cuda", requires_grad=True)
-C = torch.rand((2, O, I, G), device="cuda", requires_grad=True)
+X = torch.rand((batch_size, in_dim), device="cuda", requires_grad=True)
+scale_base = torch.rand((out_dim, in_dim), device="cuda", requires_grad=True)
+scale_spline = torch.rand((out_dim, in_dim), device="cuda", requires_grad=True)
+coeff = torch.rand((2, out_dim, in_dim, grid_size), device="cuda", requires_grad=True)
 
-y1 = efficient_fftkan(X, W, S, C).mean()
+y1 = efficient_fftkan(X, scale_base, scale_spline, coeff).mean()
 y1.backward()
 
 dX = X.grad.clone()
-dW = W.grad.clone()
-dS = S.grad.clone()
-dC = C.grad.clone()
+d_scale_base = scale_base.grad.clone()
+d_scale_spline = scale_spline.grad.clone()
+d_coeff = coeff.grad.clone()
 
 X.grad = None
-W.grad = None
-S.grad = None
-C.grad = None
+scale_base.grad = None
+scale_spline.grad = None
+coeff.grad = None
 
-y2 = fftkan(X, W, S, C).mean()
+y2 = fftkan(X, scale_base, scale_spline, coeff).mean()
 y2.backward()
 
 print(
@@ -33,6 +33,6 @@ print(
 )
 
 print(f"grad diff X: {torch.abs(dX - X.grad).max()}")
-print(f"grad diff W: {torch.abs(dW - W.grad).max()}")
-print(f"grad diff S: {torch.abs(dS - S.grad).max()}")
-print(f"grad diff C: {torch.abs(dC - C.grad).max()}")
+print(f"grad diff scale_base: {torch.abs(d_scale_base - scale_base.grad).max()}")
+print(f"grad diff scale_spline: {torch.abs(d_scale_spline - scale_spline.grad).max()}")
+print(f"grad diff coeff: {torch.abs(d_coeff - coeff.grad).max()}")

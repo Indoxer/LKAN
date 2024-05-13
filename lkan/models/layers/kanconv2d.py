@@ -4,7 +4,7 @@ import numpy as np
 import torch
 from torch.nn import functional as F
 
-from lkan.utils.kan import conv_efficient_fftkan
+from lkan.utils.kan import conv2d_efficient_fftkan
 
 from .kan_linear import KANLinear
 from .kan_linear_fft import KANLinearFFT
@@ -26,13 +26,20 @@ class KANConv2d(torch.nn.Module):
         noise_scale_base=0.1,
         scale_spline=1.0,
         base_fun=torch.nn.SiLU(),
-        sp_trainable=True,
-        sb_trainable=True,
+        scale_spline_trainable=True,
+        scale_base_trainable=True,
         chunk_size=None,
         device="cpu",
     ):
         super().__init__()
-        self.kernel_size = kernel_size
+        if isinstance(kernel_size, int):
+            self.kernel_size = (kernel_size, kernel_size)
+        elif isinstance(kernel_size, tuple) and len(kernel_size) == 2:
+            self.kernel_size = kernel_size
+        else:
+            raise ValueError(
+                "kernel_size must be an integer or a tuple of two integers"
+            )
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.stride = stride
@@ -45,30 +52,30 @@ class KANConv2d(torch.nn.Module):
         self.device = device
         self.chunk_size = chunk_size
 
-        ##
-
         if scale_spline is not None:
             self.scale_spline = torch.nn.Parameter(
                 torch.full(
                     (
-                        self.in_channels / self.groups,
-                        out_channels,
-                        kernel_size**2,
+                        self.out_channels,
+                        self.in_channels // self.groups,
+                        self.kernel_size[0],
+                        self.kernel_size[1],
                     ),
                     fill_value=scale_spline,
                     device=device,
                 ),
-                requires_grad=sp_trainable,
+                requires_grad=scale_spline_trainable,
             )
         else:
             self.register_buffer("scale_spline", torch.tensor([1.0], device=device))
 
         self.coeff = torch.nn.Parameter(
             torch.rand(
-                self.in_channels / self.groups,
                 2,
-                out_channels,
-                kernel_size**2,
+                self.out_channels,
+                (self.in_channels // self.groups),
+                self.kernel_size[0],
+                self.kernel_size[1],
                 grid_size,
                 device=device,
             )
@@ -81,9 +88,10 @@ class KANConv2d(torch.nn.Module):
                 1 / (kernel_size**2**0.5)
                 + (
                     torch.randn(
-                        self.in_channels / self.groups,
                         self.out_channels,
-                        self.kernel_size**2,
+                        self.in_channels // self.groups,
+                        self.kernel_size[0],
+                        self.kernel_size[1],
                         device=device,
                     )
                     * 2
@@ -91,10 +99,8 @@ class KANConv2d(torch.nn.Module):
                 )
                 * noise_scale_base
             ),
-            requires_grad=sb_trainable,
+            requires_grad=scale_base_trainable,
         )
-
-        ##
 
         if bias:
             self.bias = torch.nn.Parameter(
@@ -103,14 +109,14 @@ class KANConv2d(torch.nn.Module):
         else:
             self.bias = bias
 
-        self.conv_fftkan = conv_efficient_fftkan
+        self.conv_fftkan = conv2d_efficient_fftkan
 
     def forward(self, x):
         x = self.conv_fftkan(
             x,
-            self.coeff,
-            self.scale_spline,
             self.scale_base,
+            self.scale_spline,
+            self.coeff,
             self.bias,
             stride=self.stride,
             padding=self.padding,
