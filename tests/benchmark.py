@@ -3,7 +3,7 @@ import torch
 from lkan.utils.kan import efficient_fftkan, fftkan
 
 
-def benchmark(X, Y, layer, name, times, args):
+def benchmark(X, Y, layer, name, times, args, kwargs):
     forwards_t = 0.0
     forwards_mem = 0.0
     backwards_t = 0.0
@@ -41,20 +41,23 @@ def benchmark(X, Y, layer, name, times, args):
 
     print(
         f"""
-################# {name} #########################
+###############################################################
+    {name.upper()}:
     forward avg time: {forwards_t:.4G} ms
     backward avg time: {backwards_t:.4G} ms
     forward max memory peak: {forwards_mem/(10**6):.4G} MB
     backward max memory peak: {(backwards_mem/(10**6)):.4G} MB
-#################################################
-        """
+    
+{chr(10).join([f'    {k}: {v}' for k, v in kwargs.items()])}
+###############################################################
+"""
     )
 
 
-batch_size = 200
-grid_size = 300
-in_dim = 200
-out_dim = 200
+batch_size = 1
+grid_size = 100
+in_dim = 800
+out_dim = 800
 
 X = torch.rand((batch_size, in_dim), device="cuda", requires_grad=True)
 Y = torch.rand((batch_size, out_dim), device="cuda", requires_grad=True)
@@ -64,5 +67,12 @@ coeff = torch.rand((2, out_dim, in_dim, grid_size), device="cuda", requires_grad
 
 args = (scale_base, scale_spline, coeff)
 
-benchmark(X, Y, efficient_fftkan, "efficient kan", 10, args)
-benchmark(X, Y, fftkan, "fftkan cuda", 10, args)
+kwargs = {
+    "batch size": batch_size,
+    "in dim": in_dim,
+    "out dim": out_dim,
+    "grid size": grid_size,
+}
+
+benchmark(X, Y, efficient_fftkan, "efficient kan", 30, args, kwargs)
+benchmark(X, Y, fftkan, "fftkan cuda", 30, args, kwargs)
