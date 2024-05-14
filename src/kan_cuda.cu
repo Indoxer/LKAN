@@ -146,7 +146,7 @@ torch::Tensor fftkan_cuda_forward(torch::Tensor X, torch::Tensor scale_base,
                                   torch::Tensor scale_spline,
                                   torch::Tensor coeff, int batch_size,
                                   int in_dim, int out_dim, int grid_size) {
-    auto Y = torch::zeros({batch_size, out_dim}, X.options());
+    auto Y = torch::empty({batch_size, out_dim}, X.options());
 
     const dim3 threads(32, 32);
     const dim3 blocks((batch_size + threads.x - 1) / threads.x,
@@ -173,10 +173,10 @@ fftkan_cuda_backward(torch::Tensor dY, torch::Tensor X,
                      torch::Tensor scale_base, torch::Tensor scale_spline,
                      torch::Tensor coeff, int batch_size, int in_dim,
                      int out_dim, int grid_size) {
-    auto dX = torch::zeros_like(X);
-    auto d_scale_base = torch::zeros_like(scale_base);
-    auto d_scale_spline = torch::zeros_like(scale_spline);
-    auto d_coeff = torch::zeros_like(coeff);
+    auto dX = torch::empty_like(X);
+    auto d_scale_base = torch::empty_like(scale_base);
+    auto d_scale_spline = torch::empty_like(scale_spline);
+    auto d_coeff = torch::empty_like(coeff);
 
     const dim3 threads(16, 16);
     const dim3 blocks((out_dim + threads.x - 1) / threads.x,
@@ -222,7 +222,7 @@ torch::Tensor conv2d_fftkan_cuda_forward(
     int dilation, int groups, int batch_size, int in_channels,
     std::tuple<int, int> hw, int out_channels, std::tuple<int, int> kernel_size,
     int grid_size) {
-    auto Y = torch::zeros({batch_size, out_channels, std::get<0>(hw), std::get<1>(hw)}, X.options());
+    auto Y = torch::empty({batch_size, out_channels, std::get<0>(hw), std::get<1>(hw)}, X.options());
 
     return Y;
 }
@@ -237,11 +237,11 @@ conv2d_fftkan_cuda_backward(torch::Tensor dY, torch::Tensor X,
                             int in_channels, std::tuple<int, int> hw,
                             int out_channels, std::tuple<int, int> kernel_size,
                             int grid_size) {
-    auto dX = torch::zeros_like(X);
-    auto d_scale_base = torch::zeros_like(scale_base);
-    auto d_scale_spline = torch::zeros_like(scale_spline);
-    auto d_coeff = torch::zeros_like(coeff);
-    auto d_bias = torch::zeros_like(bias);
+    auto dX = torch::empty_like(X);
+    auto d_scale_base = torch::empty_like(scale_base);
+    auto d_scale_spline = torch::empty_like(scale_spline);
+    auto d_coeff = torch::empty_like(coeff);
+    auto d_bias = torch::empty_like(bias);
 
     return {dX, d_scale_base, d_scale_spline, d_coeff, d_bias};
 }
