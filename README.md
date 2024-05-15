@@ -5,7 +5,7 @@ Implementations of KAN variations.
 1. Install [conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html)
 2. Install CUDA (If you can run CUDA pytorch code, then it should works)
 
-3. Use `install.sh` or `install.cmd`
+3. Use `install.sh` (in future `install.cmd`)
 
 # Running
 
@@ -19,14 +19,16 @@ To view charts, run `tensorboard --logdir ./.experiments/`
 
 See examples/
 
-`continual_training_adam.ipynb`, `continual_training_lbfgs.ipynb` - continual training
+Only done so far:
+
+- `continual_training_adam.ipynb`, `continual_training_lbfgs.ipynb`
 
 # Contribution
 
-## Additional development packages/apps:
+#### Additional development packages/apps:
 - cuda-toolkit (nsight compute)
 
-## Tips:
+#### Good to know:
 1. To run nvidia nsight compute on kernels:
 - Add conda python interpreter as executable and python file as args.
 - Install lkancpp `CUDA_LINEINFO=1 pip install ./lkancpp/` to see kernels code.
@@ -72,6 +74,6 @@ See examples/
 
 [efficient-kan](https://github.com/Blealtan/efficient-kan) - KANLinear and optimizations
 
-[gkan](https://github.com/paluzki) - Thanks to Paluzki for proposing Gaussian KAN (KANLinearG)
+Thanks to [Paluzki]((https://github.com/paluzki)) for proposing Gaussian KAN (KANLinearG - in progress)
 
 

@@ -87,7 +87,7 @@ class KANLinearG(torch.nn.Module):
                 (x - (k / self.grid_size))
                 * ((self.grid_size + 1) * torch.sqrt(torch.pi))
             )
-        )  # [batch_size, in_dim, grid_size] # gradient issues?
+        )  # [batch_size, in_dim, grid_size] # gradients issues because of exp and power?
 
         ####### Efficient KAN forward #########
 
