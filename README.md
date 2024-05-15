@@ -1,13 +1,12 @@
 # Large Kolmogorov-Arnold Networks
 Implementations of KAN variations.
 
-# Installation
+## Installation
 1. Install [conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html)
 2. Install CUDA (If you can run CUDA pytorch code, then it should works)
+3. Run `bash -l install.sh` (in future `install.cmd`)
 
-3. Use `install.sh` (in future `install.cmd`)
-
-# Running
+## Running
 
 Activate conda env `conda activate lkan`
 
@@ -15,7 +14,7 @@ To run mnist select config in `main.py` and run `main.py`.
 
 To view charts, run `tensorboard --logdir ./.experiments/`
 
-# Docs
+## Docs
 
 See examples/
 
@@ -23,7 +22,7 @@ Only done so far:
 
 - `continual_training_adam.ipynb`, `continual_training_lbfgs.ipynb`
 
-# Contribution
+## Contribution/Development
 
 #### Additional development packages/apps:
 - cuda-toolkit (nsight compute)
@@ -32,9 +31,12 @@ Only done so far:
 1. To run nvidia nsight compute on kernels:
 - Add conda python interpreter as executable and python file as args.
 - Install lkancpp `CUDA_LINEINFO=1 pip install ./lkancpp/` to see kernels code.
+2. Installing packages:
+- `pip install .` to update package after modifying `lkan/`
+- `pip install ./lkancpp` to recompile lkancpp.
 
 
-# TODO/Ideas:
+## TODO/Ideas:
 - [ ] Use cmake for lkancpp build.
 - [ ] remove unnecessary dependencies in requirements.txt
 - [ ] test update_grid and "Other possibilities are: (a) the grid is learnable with gradient descent" from paper. 
@@ -53,13 +55,13 @@ Only done so far:
 - [ ] Write functions to prune KAN layers.
 - [ ] Write unit tests for used methods (CUDA version matching pytorch version, pytorch version tests on simple examples)
 
-# Problems
+## Problems
 - [ ] update_grid on cuda raise error (torch.linalg.lstsq assume full rank on cuda, only one algorithm) - solved temporary, moved calculating lstsq to cpu
 - [ ] update_grid_from_samples in original KAN run model multiple times, is it necessary? 
 - [ ] parameters counting, is grid parameter or not?
 - [ ] MLP training is almost instant, but KAN train slow on start
 
-# Citations
+## Citations
 ```python
 @misc{liu2024kan,
       title={KAN: Kolmogorov-Arnold Networks}, 
