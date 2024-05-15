@@ -24,8 +24,11 @@ Only done so far:
 
 ## Contribution/Development
 
+#### Contact
+If you have any questions, please create issue or contact indoxer.mk@gmail.com
+
 #### Additional development packages/apps:
-- cuda-toolkit (nsight compute)
+- cuda-toolkit (nsight compute, etc.)
 
 #### Good to know:
 1. To run nvidia nsight compute on kernels:
