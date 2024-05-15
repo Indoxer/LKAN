@@ -1,6 +1,6 @@
 #include <torch/extension.h>
 
-#include "kan.hpp"
+#include "kan.h"
 
 PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
   m.def("fftkan_forward", &fftkan_forward, "FFTKAN forward");

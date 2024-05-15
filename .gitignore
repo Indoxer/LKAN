@@ -3,9 +3,10 @@ __pycache__/
 .data/
 checkpoints/
 build/
-Large_Kolmogorov_Arnold_Networks.egg-info
+*.egg-info
 dist/
 LKAN.egg-info/
 .experiments/
 .logs/
 .vscode/
+CMakeFiles/

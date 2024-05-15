@@ -8,7 +8,6 @@ fsspec==2024.3.1
 grpcio==1.63.0
 Jinja2==3.1.4
 kiwisolver==1.4.5
-LKAN @ file:///home/indoxer/Documents/projects/KAN
 Markdown==3.6
 MarkupSafe==2.1.5
 matplotlib==3.8.4

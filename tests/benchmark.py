@@ -56,8 +56,8 @@ def benchmark(X, Y, layer, name, times, args, kwargs):
 
 batch_size = 1
 grid_size = 100
-in_dim = 800
-out_dim = 800
+in_dim = 100
+out_dim = 100
 
 X = torch.rand((batch_size, in_dim), device="cuda", requires_grad=True)
 Y = torch.rand((batch_size, out_dim), device="cuda", requires_grad=True)
@@ -72,7 +72,8 @@ kwargs = {
     "in dim": in_dim,
     "out dim": out_dim,
     "grid size": grid_size,
+    "parameters": f"{(scale_base.numel() + scale_spline.numel() + coeff.numel())/10**6:.4G} M",
 }
 
-benchmark(X, Y, efficient_fftkan, "efficient kan", 30, args, kwargs)
-benchmark(X, Y, fftkan, "fftkan cuda", 30, args, kwargs)
+# benchmark(X, Y, efficient_fftkan, "efficient kan", 30, args, kwargs)
+benchmark(X, Y, fftkan, "fftkan cuda", 1, args, kwargs)

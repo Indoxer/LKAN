@@ -1,12 +1,13 @@
 import math
 import os
 
-import kancpp
 import torch
 import torch.nn.functional as F
 from matplotlib import scale
 from numpy import shape
 from torch.utils.cpp_extension import load
+
+import lkancpp
 
 
 def b_splines(x, grid, k):
@@ -84,7 +85,7 @@ class FFTKAN(torch.autograd.Function):
         assert list(scale_spline.shape) == [out_dim, in_dim]
         assert list(coeff.shape) == [2, out_dim, in_dim, grid_size]
 
-        return kancpp.fftkan_forward(
+        return lkancpp.fftkan_forward(
             X,
             scale_base,
             scale_spline,
@@ -114,7 +115,7 @@ class FFTKAN(torch.autograd.Function):
     @staticmethod
     @torch.autograd.function.once_differentiable
     def backward(ctx, dY):
-        dX, d_scale_base, d_scale_spline, d_coeff_weight = kancpp.fftkan_backward(
+        dX, d_scale_base, d_scale_spline, d_coeff_weight = lkancpp.fftkan_backward(
             dY, *ctx.saved_tensors, *ctx.vars
         )
 
@@ -143,7 +144,7 @@ class Conv2dFFTKAN(torch.autograd.Function):
         kernel_size = scale_base.shape[2:]
         grid_size = coeff.shape[-1]
 
-        return kancpp.conv2d_fftkan_forward(
+        return lkancpp.conv2d_fftkan_forward(
             X,
             scale_base,
             scale_spline,
@@ -202,7 +203,7 @@ class Conv2dFFTKAN(torch.autograd.Function):
     @torch.autograd.function.once_differentiable
     def backward(ctx, dY):
         dX, d_scale_base, d_scale_spline, d_coeff_weight, d_bias = (
-            kancpp.conv2d_fftkan_backward(dY, *ctx.saved_tensors, *ctx.vars)
+            lkancpp.conv2d_fftkan_backward(dY, *ctx.saved_tensors, *ctx.vars)
         )
 
         return (

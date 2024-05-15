@@ -15,10 +15,17 @@ __global__ void fftkan_cuda_forward_kernel(
     // scale_spline [out_dim, in_dim]
     // coeff [2, out_dim, in_dim, grid_size]
     // -> Y [batch_size, out_dim]
-    int b = blockIdx.x * blockDim.x + threadIdx.x;
-    int o = blockIdx.y * blockDim.y + threadIdx.y;
 
-    if (b < batch_size && o < out_dim) {
+    int o = blockIdx.x * blockDim.x + threadIdx.x;
+    int b = blockIdx.y * blockDim.y + threadIdx.y;
+
+    if (o < out_dim && b < batch_size) {
+        // for (int o = blockIdx.x * blockDim.x + threadIdx.x; o < out_dim; o += blockDim.x * gridDim.x)
+        //     for (int b = blockIdx.y * blockDim.y + threadIdx.y; b < batch_size; b += blockDim.y * gridDim.y) {
+        // for (int k = blockIdx.x * blockDim.x + threadIdx.x; k < out_dim * batch_size; k += blockDim.x * gridDim.x) {
+        // int o = k / batch_size;
+        // int b = k % batch_size;
+
         scalar_t sum = 0.0f;
         for (int i = 0; i < in_dim; i++) {
             scalar_t x = X[b][i];
@@ -148,19 +155,35 @@ torch::Tensor fftkan_cuda_forward(torch::Tensor X, torch::Tensor scale_base,
                                   int in_dim, int out_dim, int grid_size) {
     auto Y = torch::empty({batch_size, out_dim}, X.options());
 
+    int k_grid_size;
+    int k_block_size;
+
+    AT_DISPATCH_FLOATING_TYPES(
+        X.scalar_type(), "fftkan_cuda_forward_kernel", ([&]() {
+            cudaOccupancyMaxPotentialBlockSize(&k_grid_size, &k_block_size, fftkan_cuda_forward_kernel<scalar_t>, 0, 0);
+        }));
+
+    // int threads = k_block_size;
+    // int blocks = min((out_dim * batch_size + threads - 1) / threads, k_block_size);
+
+    // threads.x * threads.y % 32 == 0
+    //
+
+    // printf("grid_size: %d, block_size: %d\n", k_grid_size, k_block_size);
+
     const dim3 threads(32, 32);
-    const dim3 blocks((batch_size + threads.x - 1) / threads.x,
-                      (out_dim + threads.y - 1) / threads.y);
+    const dim3 blocks(1, 1);
+    // const dim3 blocks((out_dim + threads.y - 1) / threads.y, (batch_size + threads.x - 1) / threads.x);
 
     AT_DISPATCH_FLOATING_TYPES(
         X.scalar_type(), "fftkan_cuda_forward_kernel", ([&]() {
             fftkan_cuda_forward_kernel<scalar_t>
-                <<<blocks, threads>>>(X.packed_accessor32<scalar_t, 2>(),
-                                      scale_base.packed_accessor32<scalar_t, 2>(),
-                                      scale_spline.packed_accessor32<scalar_t, 2>(),
-                                      coeff.packed_accessor32<scalar_t, 4>(),
-                                      Y.packed_accessor32<scalar_t, 2>(),
-                                      batch_size, in_dim, out_dim, grid_size);
+                <<<blocks, threads, 0>>>(X.packed_accessor32<scalar_t, 2>(),
+                                         scale_base.packed_accessor32<scalar_t, 2>(),
+                                         scale_spline.packed_accessor32<scalar_t, 2>(),
+                                         coeff.packed_accessor32<scalar_t, 4>(),
+                                         Y.packed_accessor32<scalar_t, 2>(),
+                                         batch_size, in_dim, out_dim, grid_size);
         }));
 
     cudaDeviceSynchronize();
@@ -178,9 +201,11 @@ fftkan_cuda_backward(torch::Tensor dY, torch::Tensor X,
     auto d_scale_spline = torch::empty_like(scale_spline);
     auto d_coeff = torch::empty_like(coeff);
 
-    const dim3 threads(16, 16);
+    const dim3 threads(32, 32);
     const dim3 blocks((out_dim + threads.x - 1) / threads.x,
                       (in_dim + threads.y - 1) / threads.y);
+
+    // o
 
     AT_DISPATCH_FLOATING_TYPES(
         X.scalar_type(), "fftkan_cuda_backward_WSC", ([&] {
@@ -214,34 +239,4 @@ fftkan_cuda_backward(torch::Tensor dY, torch::Tensor X,
     cudaDeviceSynchronize();
 
     return {dX, d_scale_base, d_scale_spline, d_coeff};
-}
-
-torch::Tensor conv2d_fftkan_cuda_forward(
-    torch::Tensor X, torch::Tensor scale_base, torch::Tensor scale_spline,
-    torch::Tensor coeff, torch::Tensor bias, int stride, int padding,
-    int dilation, int groups, int batch_size, int in_channels,
-    std::tuple<int, int> hw, int out_channels, std::tuple<int, int> kernel_size,
-    int grid_size) {
-    auto Y = torch::empty({batch_size, out_channels, std::get<0>(hw), std::get<1>(hw)}, X.options());
-
-    return Y;
-}
-
-std::tuple<torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor,
-           torch::Tensor>
-conv2d_fftkan_cuda_backward(torch::Tensor dY, torch::Tensor X,
-                            torch::Tensor scale_base,
-                            torch::Tensor scale_spline, torch::Tensor coeff,
-                            torch::Tensor bias, int stride, int padding,
-                            int dilation, int groups, int batch_size,
-                            int in_channels, std::tuple<int, int> hw,
-                            int out_channels, std::tuple<int, int> kernel_size,
-                            int grid_size) {
-    auto dX = torch::empty_like(X);
-    auto d_scale_base = torch::empty_like(scale_base);
-    auto d_scale_spline = torch::empty_like(scale_spline);
-    auto d_coeff = torch::empty_like(coeff);
-    auto d_bias = torch::empty_like(bias);
-
-    return {dX, d_scale_base, d_scale_spline, d_coeff, d_bias};
 }

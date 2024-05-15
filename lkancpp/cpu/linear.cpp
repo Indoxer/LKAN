@@ -1,7 +1,6 @@
 #include <torch/extension.h>
-#include "kan.hpp"
 
-// I am abandoning the CPU implementation for now. 
+// I am abandoning the CPU implementation for now.
 
 // TODO: Implement MultiThreaded CPU version
 
