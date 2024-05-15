@@ -79,6 +79,6 @@ If you have any questions, please create issue or contact indoxer.mk@gmail.com
 
 [efficient-kan](https://github.com/Blealtan/efficient-kan) - KANLinear and optimizations
 
-Thanks to [Paluzki]((https://github.com/paluzki)) for proposing Gaussian KAN (KANLinearG - in progress)
+Thanks to [Paluzki](https://github.com/paluzki) for proposing Gaussian KAN (KANLinearG - in progress)
 
 
